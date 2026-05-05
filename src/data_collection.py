@@ -3,7 +3,7 @@ data_collection.py — Projet Aurores Boréales
 =============================================
 Collecte les données depuis :
   - NOAA SWPC   : indice Kp/Ap historique (fichiers annuels, accès libre)
-  - NASA DONKI  : événements vent solaire (clé API dans .env)
+  - NASA HAPI   : vent solaire continu via OMNIWeb (flow_speed, proton_density, BZ_GSM)
 
 Produit :
   - data/dataset.csv   (~14 600 lignes, 5 ans)
@@ -12,35 +12,24 @@ Produit :
 Usage :
   python src/data_collection.py
 """
-# data_collection.py — version corrigée NOAA trimestrielle
-
-"""
-data_collection.py
-Projet Aurores Boréales
-"""
 
 import os
-import json
 import time
 import logging
 import requests
 import pandas as pd
 import numpy as np
-
+from io import StringIO
 from datetime import datetime
-from dotenv import load_dotenv
+from dateutil.relativedelta import relativedelta
 
 # -------------------------------------------------
 # CONFIG
 # -------------------------------------------------
 
-load_dotenv()
-
-NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
-
 YEARS = [2019, 2020, 2021, 2022, 2023]
 
-RAW_DIR = "data/raw"
+RAW_DIR  = "data/raw"
 DATA_DIR = "data"
 
 os.makedirs(RAW_DIR, exist_ok=True)
@@ -52,11 +41,22 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+# Valeurs fill NASA HAPI à remplacer par NaN
+NASA_FILL_VALUES = {
+    "flow_speed":     99999.9,
+    "proton_density": 999.99,
+    "BZ_GSM":         9999.99,
+}
+
 # -------------------------------------------------
-# NOAA
+# NOAA — Indice Kp/Ap
 # -------------------------------------------------
 
 def fetch_noaa_quarter(year: int, quarter: int) -> str:
+    """
+    Télécharge un fichier trimestriel NOAA (archive NGDC stable).
+    Format : {year}Q{quarter}_DGD.txt
+    """
     filename = f"{year}Q{quarter}_DGD.txt"
     cache_file = os.path.join(RAW_DIR, filename)
 
@@ -65,302 +65,323 @@ def fetch_noaa_quarter(year: int, quarter: int) -> str:
         with open(cache_file, "r", encoding="utf-8") as f:
             return f.read()
 
-    url = (
+    base_url = (
         "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/"
-        "annual_reports/daily_solar_indices_summaries/"
-        f"daily_geomagnetic_data/{filename}"
+        "annual_reports/daily_solar_indices_summaries/daily_geomagnetic_data"
     )
-
-    log.info(f"[NOAA] téléchargement {filename}")
+    url = f"{base_url}/{filename}"
+    log.info(f"[NOAA] téléchargement {url}")
 
     try:
-        response = requests.get(url, timeout=30)
+        response = requests.get(url, timeout=60)
         response.raise_for_status()
-
         with open(cache_file, "w", encoding="utf-8") as f:
             f.write(response.text)
-
         return response.text
-
     except requests.RequestException as e:
-        log.warning(f"[NOAA] erreur {filename} : {e}")
+        log.error(f"[NOAA] erreur {filename} : {e}")
         return ""
 
 
-def parse_noaa_quarter(raw_text: str) -> pd.DataFrame:
+def parse_noaa_quarter(raw_text: str, year: int) -> pd.DataFrame:
+    """Parse le format trimestriel NOAA."""
+    import re
     rows = []
 
     for line in raw_text.splitlines():
         line = line.strip()
-
-        if (
-            not line
-            or line.startswith("#")
-            or line.startswith(":")
-        ):
+        if not line or not line.startswith(str(year)):
             continue
 
-        parts = line.split()
+        # Extraction de tous les entiers de la ligne
+        nums = re.findall(r"-?\d+", line)
 
-        # Format attendu :
-        # YYYY MM DD + données...
-        if len(parts) < 29:
+        # Format attendu : au moins 30 colonnes (Date + Données + Kp/Ap)
+        if len(nums) < 30:
             continue
 
         try:
-            year = int(parts[0])
-            month = int(parts[1])
-            day = int(parts[2])
+            mm, dd = int(nums[1]), int(nums[2])
+            date = datetime(year, mm, dd)
 
-            # bloc planétaire commence à index 21
-            ap_index = float(parts[21])
+            # Les 9 dernières valeurs : Ap planétaire + 8 Kp
+            planetary = nums[-9:]
+            ap_val = float(planetary[0])
+            kp_values = planetary[1:]
 
-            kp_values = []
-            for i in range(22, 30):
-                val = parts[i].replace("-1", " -1 ").split()
-                kp_values.extend(val)
-
-            kp_values = kp_values[:8]
-
-            date = datetime(year, month, day)
-
-            for idx, kp_raw in enumerate(kp_values):
-                try:
-                    kp = float(kp_raw)
-                except ValueError:
-                    continue
-
-                if kp < 0:
-                    continue
-
-                ts = date + pd.Timedelta(hours=idx * 3)
+            for i, hour in enumerate([0, 3, 6, 9, 12, 15, 18, 21]):
+                kp_val = float(kp_values[i])
+                if kp_val < 0: continue
 
                 rows.append({
-                    "timestamp": ts,
-                    "kp_index": kp,
-                    "ap_index": ap_index
+                    "timestamp": date + pd.Timedelta(hours=hour),
+                    "kp_index": kp_val,
+                    "ap_index": ap_val if ap_val >= 0 else np.nan,
                 })
-
         except Exception:
             continue
 
     return pd.DataFrame(rows)
 
 
-def fetch_all_noaa(years):
+def fetch_all_noaa(years: list) -> pd.DataFrame:
+    """Collecte les données NOAA trimestrielles."""
     frames = []
 
     for year in years:
-        yearly = []
-
         for quarter in range(1, 5):
             raw = fetch_noaa_quarter(year, quarter)
-
             if raw:
-                df = parse_noaa_quarter(raw)
-
+                df = parse_noaa_quarter(raw, year)
                 if not df.empty:
-                    yearly.append(df)
-
-            time.sleep(0.3)
-
-        if yearly:
-            df_year = pd.concat(yearly, ignore_index=True)
-            log.info(f"[NOAA] {year} → {len(df_year)} lignes")
-            frames.append(df_year)
+                    frames.append(df)
+            time.sleep(0.1)
 
     if not frames:
-        raise RuntimeError("Aucune donnée NOAA collectée.")
+        raise RuntimeError("[NOAA] Aucune donnée collectée.")
 
     df = pd.concat(frames, ignore_index=True)
-    df = df.sort_values("timestamp").reset_index(drop=True)
+    df = df.sort_values("timestamp").drop_duplicates(subset=["timestamp"]).reset_index(drop=True)
 
-    log.info(f"[NOAA] total → {len(df)} lignes")
+    log.info(f"[NOAA] TOTAL → {len(df)} lignes")
     return df
 
 
 # -------------------------------------------------
-# NASA
+# NASA HAPI — Vent solaire continu (OMNIWeb)
 # -------------------------------------------------
 
-def fetch_nasa_period(start_date: str, end_date: str):
-    cache_name = f"nasa_wsa_{start_date}_{end_date}.json"
+HAPI_BASE    = "https://cdaweb.gsfc.nasa.gov/hapi"
+HAPI_DATASET = "OMNI_HRO_5MIN"
+HAPI_PARAMS  = "flow_speed,proton_density,BZ_GSM"
+
+
+def fetch_hapi_month(year: int, month: int) -> pd.DataFrame:
+    """
+    Télécharge les données HAPI pour un mois complet en découpant par tranches de 10 jours
+    pour éviter les Timeouts serveurs.
+    """
+    cache_name = f"hapi_5min_{year}_{month:02d}.csv"
     cache_file = os.path.join(RAW_DIR, cache_name)
 
     if os.path.exists(cache_file):
-        log.info(f"[NASA] cache trouvé {cache_name}")
-        with open(cache_file, "r", encoding="utf-8") as f:
-            return json.load(f)
-
-    # Utilisation de WSAEnlilSimulations car GST ne contient pas la vitesse/densité du vent solaire
-    url = "https://api.nasa.gov/DONKI/WSAEnlilSimulations"
-
-    params = {
-        "startDate": start_date,
-        "endDate": end_date,
-        "api_key": NASA_API_KEY
-    }
-
-    log.info(f"[NASA] requête WSA {start_date} → {end_date}")
-
-    try:
-        response = requests.get(url, params=params, timeout=30)
-        log.info(f"[NASA] HTTP {response.status_code}")
-        response.raise_for_status()
-
-        data = response.json()
-
-        with open(cache_file, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-
-        log.info(f"[NASA] {len(data)} simulations trouvées")
-        return data
-
-    except requests.RequestException as e:
-        log.warning(f"[NASA] erreur : {e}")
-        return []
-
-
-def parse_nasa(raw_simulations):
-    rows = []
-
-    for sim in raw_simulations:
+        log.info(f"[HAPI] cache trouvé : {cache_name}")
         try:
-            # 1. Vitesse de référence depuis cmeInputs
-            fallback_speed = np.nan
-            cme_inputs = sim.get("cmeInputs")
-            if cme_inputs and len(cme_inputs) > 0:
-                fallback_speed = float(cme_inputs[0].get("speed", np.nan) or np.nan)
-
-            # 2. Chercher les impacts sur Terre
-            impacts = sim.get("impactList") or []
-            earth_impacts = [i for i in impacts if i.get("location") == "Earth"]
-
-            if earth_impacts:
-                for impact in earth_impacts:
-                    ts_str = impact.get("arrivalTime")
-                    if not ts_str:
-                        continue
-                    timestamp = datetime.strptime(ts_str[:16], "%Y-%m-%dT%H:%M")
-                    
-                    rows.append({
-                        "timestamp": timestamp,
-                        "solar_wind_speed": float(impact.get("speed", fallback_speed) or fallback_speed),
-                        "solar_wind_density": float(impact.get("density", np.nan) or np.nan),
-                        "bz_component": float(impact.get("bz", np.nan) or np.nan),
-                    })
-            
-            # 3. Fallback : estimatedShockArrivalTime si Terre touchée
-            elif sim.get("isEarthGB") or sim.get("isEarthMinorImpact"):
-                ts_str = sim.get("estimatedShockArrivalTime")
-                if ts_str:
-                    timestamp = datetime.strptime(ts_str[:16], "%Y-%m-%dT%H:%M")
-                    rows.append({
-                        "timestamp": timestamp,
-                        "solar_wind_speed": fallback_speed,
-                        "solar_wind_density": np.nan,
-                        "bz_component": np.nan,
-                    })
+            return pd.read_csv(cache_file, parse_dates=["timestamp"])
         except Exception:
+            os.remove(cache_file)
+
+    # Définition des tranches de 10 jours
+    ranges = [
+        (1, 10), (11, 20), (21, 31)
+    ]
+    
+    month_frames = []
+    
+    for start_day, end_day in ranges:
+        # Ajustement pour la fin de mois
+        try:
+            start_date = datetime(year, month, start_day)
+            # Pour la fin du mois, on va jusqu'au 1er du mois suivant
+            if end_day == 31:
+                end_date = start_date + relativedelta(months=1)
+                end_date = datetime(end_date.year, end_date.month, 1)
+            else:
+                end_date = datetime(year, month, end_day + 1)
+        except ValueError: # Cas où le mois a moins de 31 jours
             continue
 
-    return pd.DataFrame(rows)
+        start_str = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_str   = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        url = f"{HAPI_BASE}/data"
+        params = {
+            "id":         HAPI_DATASET,
+            "parameters": HAPI_PARAMS,
+            "time.min":   start_str,
+            "time.max":   end_str,
+            "format":     "csv",
+        }
+
+        max_retries = 2
+        success = False
+        for attempt in range(max_retries):
+            try:
+                log.info(f"[HAPI] {year}-{month:02d} | jours {start_day}-{end_day} (essai {attempt+1})")
+                response = requests.get(url, params=params, timeout=60)
+                response.raise_for_status()
+
+                lines = [l for l in response.text.splitlines() if not l.startswith("#")]
+                csv_text = "\n".join(lines)
+
+                if csv_text.strip():
+                    df_part = pd.read_csv(
+                        StringIO(csv_text),
+                        header=0,
+                        names=["timestamp", "flow_speed", "proton_density", "BZ_GSM"]
+                    )
+                    month_frames.append(df_part)
+                
+                success = True
+                break
+            except Exception as e:
+                log.warning(f"[HAPI] erreur tranche {start_day}-{end_day} : {e}")
+                time.sleep(3)
+
+    if not month_frames:
+        return pd.DataFrame()
+
+    df_month = pd.concat(month_frames, ignore_index=True)
+    df_month["timestamp"] = pd.to_datetime(df_month["timestamp"], utc=True).dt.tz_localize(None)
+
+    for col, fill_val in NASA_FILL_VALUES.items():
+        if col in df_month.columns:
+            df_month[col] = df_month[col].replace(fill_val, np.nan)
+            df_month.loc[df_month[col] > fill_val * 0.9, col] = np.nan
+
+    df_month.to_csv(cache_file, index=False)
+    log.info(f"[HAPI] {year}-{month:02d} terminé → {len(df_month)} lignes")
+    return df_month
 
 
-def fetch_all_nasa(years):
+def fetch_all_hapi(years: list) -> pd.DataFrame:
+    """
+    Collecte toutes les données HAPI par mois et les agrège en tranches de 3h
+    pour correspondre à la granularité NOAA.
+    """
     frames = []
 
     for year in years:
-        periods = [
-            (f"{year}-01-01", f"{year}-06-30"),
-            (f"{year}-07-01", f"{year}-12-31")
-        ]
+        for month in range(1, 13):
+            df = fetch_hapi_month(year, month)
 
-        for start, end in periods:
-            raw = fetch_nasa_period(start, end)
+            if not df.empty:
+                frames.append(df)
 
-            if raw:
-                df = parse_nasa(raw)
-
-                if not df.empty:
-                    frames.append(df)
-
-            time.sleep(1)
+            time.sleep(1)  # 1 seconde entre chaque requête
 
     if not frames:
-        log.warning("[NASA] aucune donnée collectée")
+        log.warning("[HAPI] aucune donnée collectée")
         return pd.DataFrame()
 
-    df = pd.concat(frames, ignore_index=True)
-    df = df.sort_values("timestamp").drop_duplicates().reset_index(drop=True)
+    df_all = pd.concat(frames, ignore_index=True)
+    df_all = df_all.sort_values("timestamp").reset_index(drop=True)
 
-    log.info(f"[NASA] total → {len(df)} événements")
-    return df
+    log.info(f"[HAPI] total avant agrégation → {len(df_all)} mesures à la minute")
+
+    # ---- Agrégation en tranches de 3h ----
+    # On crée une clé de tranche : on arrondit le timestamp à la tranche de 3h inférieure
+    df_all["tranche_3h"] = df_all["timestamp"].dt.floor("3h")
+
+    df_3h = df_all.groupby("tranche_3h").agg(
+        solar_wind_speed=("flow_speed",     "mean"),
+        solar_wind_density=("proton_density", "mean"),
+        bz_component=("BZ_GSM",         "mean"),
+    ).reset_index()
+
+    df_3h = df_3h.rename(columns={"tranche_3h": "timestamp"})
+
+    log.info(f"[HAPI] après agrégation 3h → {len(df_3h)} lignes")
+
+    # Rapport sur les valeurs manquantes
+    for col in ["solar_wind_speed", "solar_wind_density", "bz_component"]:
+        pct_nan = df_3h[col].isna().mean() * 100
+        log.info(f"[HAPI] NaN {col} : {pct_nan:.1f}%")
+
+    return df_3h
+
+
+# -------------------------------------------------
+# FUSION NOAA + HAPI
+# -------------------------------------------------
+
+def merge_noaa_hapi(df_noaa: pd.DataFrame, df_hapi: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fusionne les données NOAA (Kp/Ap) avec les données HAPI (vent solaire).
+    Utilise merge_asof avec une tolérance de 3h car les deux sources
+    sont maintenant à la même granularité temporelle.
+    """
+    if df_hapi.empty:
+        log.warning("[Fusion] HAPI vide, colonnes vent solaire seront NaN")
+        df_noaa["solar_wind_speed"]   = np.nan
+        df_noaa["solar_wind_density"] = np.nan
+        df_noaa["bz_component"]       = np.nan
+        return df_noaa
+
+    merged = pd.merge_asof(
+        df_noaa.sort_values("timestamp"),
+        df_hapi.sort_values("timestamp"),
+        on="timestamp",
+        direction="nearest",
+        tolerance=pd.Timedelta("3h")
+    )
+
+    n_matches = merged["solar_wind_speed"].notna().sum()
+    pct = n_matches / len(merged) * 100
+    log.info(f"[Fusion] {n_matches}/{len(merged)} correspondances NASA ({pct:.1f}%)")
+
+    return merged
 
 
 # -------------------------------------------------
 # FEATURE ENGINEERING
 # -------------------------------------------------
 
-def add_features(df):
-    df = df.copy()
+def add_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Construit les features supplémentaires.
 
+    IMPORTANT — Ordre critique pour éviter le leakage :
+    1. kp_previous_interval est construit avec shift(1) AVANT aurora_visible
+    2. aurora_visible est construit EN DERNIER
+    3. kp_index et ap_index restent dans le CSV pour traçabilité
+       mais NE DOIVENT PAS être utilisés comme features en Phase 2
+    """
+    df = df.copy()
+    df = df.sort_values("timestamp").reset_index(drop=True)
+
+    # --- Features temporelles ---
     df["month"] = df["timestamp"].dt.month
 
-    def season(m):
-        if m in [12, 1, 2]:
-            return "hiver"
-        elif m in [3, 4, 5]:
-            return "printemps"
-        elif m in [6, 7, 8]:
-            return "ete"
+    def get_season(m):
+        if m in [12, 1, 2]:   return "hiver"
+        if m in [3, 4, 5]:    return "printemps"
+        if m in [6, 7, 8]:    return "ete"
         return "automne"
 
-    df["season"] = df["month"].apply(season)
-
+    df["season"]        = df["month"].apply(get_season)
     df["hour_interval"] = df["timestamp"].dt.hour.apply(
         lambda h: f"{h:02d}h-{h+3:02d}h"
     )
 
+    # --- Cycle solaire ---
+    # Cycle 25 : minimum fin 2019, maximum estimé fin 2024
+    # On code les années proches du maximum comme is_solar_maximum=1
+    solar_max_years = {2022, 2023, 2024}
     df["is_solar_maximum"] = df["timestamp"].dt.year.apply(
-        lambda y: 1 if y >= 2023 else 0
+        lambda y: 1 if y in solar_max_years else 0
     )
 
+    # --- Feature lag Kp (shift temporel) ---
+    # kp_previous_interval = Kp de la tranche précédente (3h avant)
+    # Le shift(1) garantit qu'on n'utilise PAS d'information future
     df["kp_previous_interval"] = df["kp_index"].shift(1)
 
-    if "bz_component" not in df.columns:
-        df["bz_component"] = np.nan
+    # --- Feature Bz négatif ---
+    # Bz < 0 est physiquement favorable aux aurores (reconnexion magnétique)
+    # On gère le cas NaN explicitement
+    df["bz_negative"] = np.where(
+        df["bz_component"].isna(),
+        np.nan,
+        (df["bz_component"] < 0).astype(float)
+    )
 
-    df["bz_negative"] = (df["bz_component"] < 0).astype(int)
+    # --- Variable cible (TOUJOURS EN DERNIER) ---
+    # aurora_visible = 1 si Kp >= 5 (définition scientifique standard)
+    # ATTENTION : kp_index et ap_index ne doivent PAS être dans X en Phase 2
     df["aurora_visible"] = (df["kp_index"] >= 5).astype(int)
 
     return df
-
-
-# -------------------------------------------------
-# MERGE
-# -------------------------------------------------
-
-def merge_noaa_nasa(df_noaa, df_nasa):
-    if df_nasa.empty:
-        df_noaa["solar_wind_speed"] = np.nan
-        df_noaa["solar_wind_density"] = np.nan
-        df_noaa["bz_component"] = np.nan
-        return df_noaa
-
-    merged = pd.merge_asof(
-        df_noaa.sort_values("timestamp"),
-        df_nasa.sort_values("timestamp"),
-        on="timestamp",
-        direction="nearest",
-        tolerance=pd.Timedelta("6h")
-    )
-
-    # Diagnostic
-    n_matches = merged["solar_wind_speed"].notna().sum()
-    log.info(f"[Fusion] {n_matches} correspondances NASA trouvées sur {len(merged)} lignes NOAA.")
-
-    return merged
 
 
 # -------------------------------------------------
@@ -368,49 +389,83 @@ def merge_noaa_nasa(df_noaa, df_nasa):
 # -------------------------------------------------
 
 def main():
-    print("=" * 50)
-    print("PROJET AURORES BORÉALES")
-    print("=" * 50)
+    print("=" * 55)
+    print("  PROJET AURORES BORÉALES — Collecte des données")
+    print("=" * 55)
 
-    print("\n── Collecte NOAA ──")
+    # ── 1. NOAA ──
+    print("\n[1/4] Collecte NOAA (Kp/Ap)...")
     df_noaa = fetch_all_noaa(YEARS)
+    print(f"      → {len(df_noaa)} lignes collectées")
 
-    print("\n── Collecte NASA ──")
-    df_nasa = fetch_all_nasa(YEARS)
+    # ── 2. NASA HAPI ──
+    print("\n[2/4] Collecte NASA HAPI (vent solaire continu)...")
+    df_hapi = fetch_all_hapi(YEARS)
+    print(f"      → {len(df_hapi)} tranches de 3h collectées")
 
-    print("\n── Fusion ──")
-    df = merge_noaa_nasa(df_noaa, df_nasa)
+    # ── 3. Fusion ──
+    print("\n[3/4] Fusion NOAA + HAPI...")
+    df = merge_noaa_hapi(df_noaa, df_hapi)
+    print(f"      → {len(df)} lignes après fusion")
 
-    print("\n── Feature engineering ──")
+    # ── 4. Feature engineering ──
+    print("\n[4/4] Feature engineering...")
     df = add_features(df)
 
+    # ── Colonnes finales ──
+    # kp_index et ap_index sont gardés pour traçabilité
+    # mais annotés comme NON-FEATURES dans DATASET.md
     final_columns = [
         "timestamp",
-        "kp_index",
-        "ap_index",
-        "solar_wind_speed",
-        "solar_wind_density",
-        "bz_component",
-        "month",
-        "season",
-        "hour_interval",
-        "is_solar_maximum",
-        "kp_previous_interval",
-        "bz_negative",
-        "aurora_visible"
+        # === FEATURES D'ENTRAÎNEMENT (X) ===
+        "solar_wind_speed",      # NASA HAPI
+        "solar_wind_density",    # NASA HAPI
+        "bz_component",          # NASA HAPI
+        "month",                 # NOAA dérivé
+        "season",                # NOAA dérivé
+        "hour_interval",         # NOAA dérivé
+        "is_solar_maximum",      # dérivé
+        "kp_previous_interval",  # NOAA lag
+        "bz_negative",           # dérivé de bz_component
+        # === COLONNES SOURCES (traçabilité uniquement, exclure de X) ===
+        "kp_index",              # SOURCE de aurora_visible — NE PAS utiliser en X
+        "ap_index",              # CORRÉLÉ à kp_index — NE PAS utiliser en X
+        # === VARIABLE CIBLE (y) ===
+        "aurora_visible",
     ]
 
     df = df[[c for c in final_columns if c in df.columns]]
 
+    # Supprimer les lignes sans valeur Kp (impossible de construire la cible)
+    df = df.dropna(subset=["kp_index", "aurora_visible"])
+    df = df.reset_index(drop=True)
+
+    # ── Export ──
     dataset_path = os.path.join(DATA_DIR, "dataset.csv")
-    sample_path = os.path.join(DATA_DIR, "sample.csv")
+    sample_path  = os.path.join(DATA_DIR, "sample.csv")
 
     df.to_csv(dataset_path, index=False)
     df.head(100).to_csv(sample_path, index=False)
 
-    print(f"\n✅ dataset exporté : {dataset_path}")
-    print(f"✅ sample exporté  : {sample_path}")
-    print(f"Total lignes : {len(df)}")
+    # ── Résumé ──
+    print("\n" + "=" * 55)
+    print("  RÉSUMÉ DU DATASET")
+    print("=" * 55)
+    print(f"  Lignes totales     : {len(df)}")
+    print(f"  Colonnes           : {len(df.columns)}")
+    print(f"  Période            : {df['timestamp'].min()} → {df['timestamp'].max()}")
+    print(f"\n  Distribution cible :")
+    vc = df["aurora_visible"].value_counts()
+    print(f"    Classe 0 (Kp < 5) : {vc.get(0, 0)} ({vc.get(0, 0)/len(df)*100:.1f}%)")
+    print(f"    Classe 1 (Kp ≥ 5) : {vc.get(1, 0)} ({vc.get(1, 0)/len(df)*100:.1f}%)")
+    print(f"\n  NaN par feature :")
+    for col in ["solar_wind_speed", "solar_wind_density", "bz_component", "bz_negative", "kp_previous_interval"]:
+        if col in df.columns:
+            pct = df[col].isna().mean() * 100
+            print(f"    {col:<25} : {pct:.1f}%")
+    print(f"\n  ✅ Dataset exporté : {dataset_path}")
+    print(f"  ✅ Sample exporté  : {sample_path}")
+    print("=" * 55)
 
 
 if __name__ == "__main__":

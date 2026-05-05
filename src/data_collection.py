@@ -56,131 +56,160 @@ log = logging.getLogger(__name__)
 # NOAA
 # -------------------------------------------------
 
-def fetch_noaa_quarter(year: int, quarter: int) -> str:
-    filename = f"{year}Q{quarter}_DGD.txt"
-    cache_file = os.path.join(RAW_DIR, filename)
+# -------------------------------------------------
+# NOAA
+# -------------------------------------------------
 
-    if os.path.exists(cache_file):
-        log.info(f"[NOAA] cache trouvé : {filename}")
-        with open(cache_file, "r", encoding="utf-8") as f:
-            return f.read()
-
-    url = (
-        "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/"
-        "annual_reports/daily_solar_indices_summaries/"
-        f"daily_geomagnetic_data/{filename}"
-    )
-
-    log.info(f"[NOAA] téléchargement {filename}")
-
-    try:
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
-
-        with open(cache_file, "w", encoding="utf-8") as f:
-            f.write(response.text)
-
-        return response.text
-
-    except requests.RequestException as e:
-        log.warning(f"[NOAA] erreur {filename} : {e}")
-        return ""
-
-
-def parse_noaa_quarter(raw_text: str) -> pd.DataFrame:
+def parse_noaa_text(raw_text: str) -> pd.DataFrame:
+    """Parse le format texte brut de la NOAA (DGD)"""
     rows = []
-
     for line in raw_text.splitlines():
         line = line.strip()
-
-        if (
-            not line
-            or line.startswith("#")
-            or line.startswith(":")
-        ):
+        if not line or line.startswith("#") or line.startswith(":"):
             continue
-
         parts = line.split()
-
-        # Format attendu :
-        # YYYY MM DD + données...
         if len(parts) < 29:
             continue
-
         try:
-            year = int(parts[0])
-            month = int(parts[1])
-            day = int(parts[2])
-
-            # bloc planétaire commence à index 21
+            year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
             ap_index = float(parts[21])
-
+            # Kp values are from index 22 to 29
             kp_values = []
             for i in range(22, 30):
                 val = parts[i].replace("-1", " -1 ").split()
                 kp_values.extend(val)
-
-            kp_values = kp_values[:8]
-
+            kp_values = [float(k) for k in kp_values[:8] if float(k) >= 0]
+            
             date = datetime(year, month, day)
-
-            for idx, kp_raw in enumerate(kp_values):
-                try:
-                    kp = float(kp_raw)
-                except ValueError:
-                    continue
-
-                if kp < 0:
-                    continue
-
+            for idx, kp in enumerate(kp_values):
                 ts = date + pd.Timedelta(hours=idx * 3)
-
-                rows.append({
-                    "timestamp": ts,
-                    "kp_index": kp,
-                    "ap_index": ap_index
-                })
-
+                rows.append({"timestamp": ts, "kp_index": kp, "ap_index": ap_index})
         except Exception:
             continue
-
     return pd.DataFrame(rows)
 
+def fetch_noaa_quarter(year: int, quarter: int) -> pd.DataFrame:
+    """Télécharge et stocke les données NOAA en JSON"""
+    json_filename = f"{year}Q{quarter}_DGD.json"
+    json_path = os.path.join(RAW_DIR, json_filename)
+    
+    if os.path.exists(json_path):
+        log.info(f"[NOAA] cache JSON trouvé : {json_filename}")
+        df = pd.read_json(json_path)
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        return df
+
+    # Si pas de JSON, on regarde si on a l'ancien TXT pour le convertir
+    txt_path = json_path.replace(".json", ".txt")
+    raw_text = ""
+    
+    if os.path.exists(txt_path):
+        with open(txt_path, "r", encoding="utf-8") as f:
+            raw_text = f.read()
+    else:
+        url = f"https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/annual_reports/daily_solar_indices_summaries/daily_geomagnetic_data/{os.path.basename(txt_path)}"
+        log.info(f"[NOAA] téléchargement {url}")
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            raw_text = response.text
+        except Exception as e:
+            log.warning(f"[NOAA] erreur : {e}")
+            return pd.DataFrame()
+
+    df = parse_noaa_text(raw_text)
+    if not df.empty:
+        df.to_json(json_path, orient="records", indent=4, date_format="iso")
+        if os.path.exists(txt_path): os.remove(txt_path) # Nettoyage
+    return df
 
 def fetch_all_noaa(years):
     frames = []
-
     for year in years:
-        yearly = []
-
         for quarter in range(1, 5):
-            raw = fetch_noaa_quarter(year, quarter)
-
-            if raw:
-                df = parse_noaa_quarter(raw)
-
-                if not df.empty:
-                    yearly.append(df)
-
-            time.sleep(0.3)
-
-        if yearly:
-            df_year = pd.concat(yearly, ignore_index=True)
-            log.info(f"[NOAA] {year} → {len(df_year)} lignes")
-            frames.append(df_year)
-
-    if not frames:
-        raise RuntimeError("Aucune donnée NOAA collectée.")
-
-    df = pd.concat(frames, ignore_index=True)
-    df = df.sort_values("timestamp").reset_index(drop=True)
-
+            df = fetch_noaa_quarter(year, quarter)
+            if not df.empty: frames.append(df)
+    if not frames: raise RuntimeError("Aucune donnée NOAA collectée.")
+    df = pd.concat(frames, ignore_index=True).sort_values("timestamp")
     log.info(f"[NOAA] total → {len(df)} lignes")
+    return df
+
+# -------------------------------------------------
+# OMNI (ACE/DSCOVR)
+# -------------------------------------------------
+
+def fetch_omni_year(year: int) -> pd.DataFrame:
+    """Télécharge et stocke les données OMNI en JSON"""
+    json_filename = f"omni2_{year}.json"
+    json_path = os.path.join(RAW_DIR, json_filename)
+    
+    if os.path.exists(json_path):
+        log.info(f"[OMNI] cache JSON trouvé : {json_filename}")
+        df = pd.read_json(json_path)
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        return df
+
+    dat_path = json_path.replace(".json", ".dat")
+    raw_text = ""
+    
+    if os.path.exists(dat_path):
+        with open(dat_path, "r", encoding="utf-8") as f:
+            raw_text = f.read()
+    else:
+        url = f"https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_{year}.dat"
+        log.info(f"[OMNI] téléchargement {url}")
+        headers = {"User-Agent": "Mozilla/5.0"}
+        try:
+            response = requests.get(url, headers=headers, timeout=120)
+            response.raise_for_status()
+            if not (response.text.strip().startswith("<") or "<html>" in response.text.lower()):
+                raw_text = response.text
+        except Exception as e:
+            log.warning(f"[OMNI] erreur : {e}")
+            return pd.DataFrame()
+
+    if not raw_text: return pd.DataFrame()
+    
+    # Parsing robuste
+    import io
+    try:
+        raw_df = pd.read_csv(io.StringIO(raw_text), sep=r"\s+", header=None)
+        res = pd.DataFrame()
+        res["timestamp"] = pd.to_datetime(raw_df[0].astype(str) + "-" + raw_df[1].astype(str).str.zfill(3), format="%Y-%j")
+        res["timestamp"] += pd.to_timedelta(raw_df[2], unit="h")
+        res["bz_component"] = pd.to_numeric(raw_df[16], errors='coerce')
+        res["solar_wind_density"] = pd.to_numeric(raw_df[23], errors='coerce')
+        res["solar_wind_speed"] = pd.to_numeric(raw_df[24], errors='coerce')
+        
+        # NaNs
+        res.loc[res["bz_component"] > 990, "bz_component"] = np.nan
+        res.loc[res["solar_wind_density"] > 990, "solar_wind_density"] = np.nan
+        res.loc[res["solar_wind_speed"] > 99990, "solar_wind_speed"] = np.nan
+        df = res.dropna(subset=["bz_component", "solar_wind_density", "solar_wind_speed"], how="all")
+        
+        if not df.empty:
+            df.to_json(json_path, orient="records", indent=4, date_format="iso")
+            if os.path.exists(dat_path): os.remove(dat_path) # Nettoyage
+        return df
+    except Exception as e:
+        log.error(f"[OMNI] erreur parsing : {e}")
+        return pd.DataFrame()
+
+def fetch_all_omni(years):
+    frames = []
+    for year in years:
+        df = fetch_omni_year(year)
+        if not df.empty:
+            log.info(f"[OMNI] {year} → {len(df)} lignes")
+            frames.append(df)
+    if not frames: return pd.DataFrame()
+    df = pd.concat(frames, ignore_index=True).sort_values("timestamp")
+    log.info(f"[OMNI] total → {len(df)} lignes")
     return df
 
 
 # -------------------------------------------------
-# NASA
+# NASA DONKI (Optionnel, conservé pour référence)
 # -------------------------------------------------
 
 def fetch_nasa_period(start_date: str, end_date: str):
@@ -353,7 +382,7 @@ def merge_noaa_nasa(df_noaa, df_nasa):
         df_nasa.sort_values("timestamp"),
         on="timestamp",
         direction="nearest",
-        tolerance=pd.Timedelta("6h")
+        tolerance=pd.Timedelta("24h")
     )
 
     # Diagnostic
@@ -372,16 +401,17 @@ def main():
     print("PROJET AURORES BORÉALES")
     print("=" * 50)
 
-    print("\n── Collecte NOAA ──")
+    print("\n-- Collecte NOAA --")
     df_noaa = fetch_all_noaa(YEARS)
 
-    print("\n── Collecte NASA ──")
-    df_nasa = fetch_all_nasa(YEARS)
+    print("\n-- Collecte OMNI (ACE/DSCOVR) --")
+    df_omni = fetch_all_omni(YEARS)
 
-    print("\n── Fusion ──")
-    df = merge_noaa_nasa(df_noaa, df_nasa)
+    print("\n-- Fusion --")
+    # On utilise maintenant OMNI à la place de NASA DONKI pour la fusion
+    df = merge_noaa_nasa(df_noaa, df_omni)
 
-    print("\n── Feature engineering ──")
+    print("\n-- Feature engineering --")
     df = add_features(df)
 
     final_columns = [
@@ -408,8 +438,8 @@ def main():
     df.to_csv(dataset_path, index=False)
     df.head(100).to_csv(sample_path, index=False)
 
-    print(f"\n✅ dataset exporté : {dataset_path}")
-    print(f"✅ sample exporté  : {sample_path}")
+    print(f"\n[OK] dataset exporté : {dataset_path}")
+    print(f"[OK] sample exporté  : {sample_path}")
     print(f"Total lignes : {len(df)}")
 
 

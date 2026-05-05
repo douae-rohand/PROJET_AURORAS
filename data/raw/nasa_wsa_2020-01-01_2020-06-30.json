@@ -1,0 +1,1185 @@
+[
+  {
+    "simulationID": "WSA-ENLIL/15258/1",
+    "modelCompletionTime": "2020-01-06T21:23Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-01-05T16:45Z",
+        "latitude": -2.0,
+        "longitude": 9.0,
+        "speed": 227.0,
+        "halfAngle": 19.0,
+        "time21_5": "2020-01-06T16:13Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-01-05T16:45:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15258/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15273/1",
+    "modelCompletionTime": "2020-01-15T17:09Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-01-14T11:09Z",
+        "latitude": -5.0,
+        "longitude": 12.0,
+        "speed": 205.0,
+        "halfAngle": 6.0,
+        "time21_5": "2020-01-15T03:44Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-01-14T11:09:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": "2020-01-18T06:00Z",
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": true,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15273/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15283/1",
+    "modelCompletionTime": "2020-01-20T17:46Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-01-18T20:12Z",
+        "latitude": 5.0,
+        "longitude": -115.0,
+        "speed": 193.0,
+        "halfAngle": 17.0,
+        "time21_5": "2020-01-19T23:11Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-01-18T20:12:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15283/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15295/1",
+    "modelCompletionTime": "2020-01-26T10:28Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-01-25T18:54Z",
+        "latitude": 2.0,
+        "longitude": -17.0,
+        "speed": 362.0,
+        "halfAngle": 10.0,
+        "time21_5": "2020-01-26T04:27Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-01-25T18:54:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": "2020-01-29T04:00Z",
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": true,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15295/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15321/1",
+    "modelCompletionTime": "2020-02-12T10:35Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-02-11T17:41Z",
+        "latitude": 2.0,
+        "longitude": -45.0,
+        "speed": 341.0,
+        "halfAngle": 21.0,
+        "time21_5": "2020-02-12T08:51Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-02-11T17:41:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15321/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15330/1",
+    "modelCompletionTime": "2020-02-16T09:28Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-02-15T06:12Z",
+        "latitude": -2.0,
+        "longitude": -40.0,
+        "speed": 443.0,
+        "halfAngle": 19.0,
+        "time21_5": "2020-02-15T22:36Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-02-15T06:12:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15330/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15335/1",
+    "modelCompletionTime": "2020-02-18T09:31Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-02-17T09:09Z",
+        "latitude": 4.0,
+        "longitude": -167.0,
+        "speed": 308.0,
+        "halfAngle": 18.0,
+        "time21_5": "2020-02-17T22:31Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-02-17T09:09:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15335/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15359/1",
+    "modelCompletionTime": "2020-02-29T23:13Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-02-28T17:54Z",
+        "latitude": 19.0,
+        "longitude": -9.0,
+        "speed": 200.0,
+        "halfAngle": 24.0,
+        "time21_5": "2020-02-29T13:32Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-02-28T17:54:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15359/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15362/1",
+    "modelCompletionTime": "2020-02-29T23:41Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-02-29T12:48Z",
+        "latitude": 2.0,
+        "longitude": -138.0,
+        "speed": 410.0,
+        "halfAngle": 18.0,
+        "time21_5": "2020-02-29T22:59Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-02-29T12:48:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15362/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15366/1",
+    "modelCompletionTime": "2020-03-03T11:51Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-03-02T20:09Z",
+        "latitude": 5.0,
+        "longitude": 20.0,
+        "speed": 285.0,
+        "halfAngle": 16.0,
+        "time21_5": "2020-03-03T12:31Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-03-02T20:09:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": "2020-03-07T00:00Z",
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": 3,
+    "kp_135": 4,
+    "kp_180": 4,
+    "isEarthGB": true,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15366/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15370/1",
+    "modelCompletionTime": "2020-03-04T10:09Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-03-03T18:09Z",
+        "latitude": 7.0,
+        "longitude": -20.0,
+        "speed": 266.0,
+        "halfAngle": 10.0,
+        "time21_5": "2020-03-04T06:07Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-03-03T18:09:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15370/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15399/1",
+    "modelCompletionTime": "2020-03-21T13:11Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-03-20T08:12Z",
+        "latitude": 1.0,
+        "longitude": -117.0,
+        "speed": 237.0,
+        "halfAngle": 24.0,
+        "time21_5": "2020-03-21T03:24Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-03-20T08:12:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": [
+      {
+        "isGlancingBlow": true,
+        "isMinorImpact": false,
+        "location": "OSIRIS-REx",
+        "arrivalTime": "2020-03-24T12:00Z"
+      }
+    ],
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15399/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15403/1",
+    "modelCompletionTime": "2020-03-22T15:39Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-03-21T17:00Z",
+        "latitude": 2.0,
+        "longitude": -50.0,
+        "speed": 489.0,
+        "halfAngle": 9.0,
+        "time21_5": "2020-03-22T07:54Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-03-21T17:00:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15403/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15418/1",
+    "modelCompletionTime": "2020-03-30T18:43Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-03-30T04:24Z",
+        "latitude": -1.0,
+        "longitude": 180.0,
+        "speed": 160.0,
+        "halfAngle": 25.0,
+        "time21_5": "2020-03-30T23:29Z",
+        "featureCode": "null",
+        "isMostAccurate": false,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-03-30T04:24:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15418/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15423/1",
+    "modelCompletionTime": "2020-03-31T13:47Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-03-30T04:24Z",
+        "latitude": -2.0,
+        "longitude": 166.0,
+        "speed": 180.0,
+        "halfAngle": 23.0,
+        "time21_5": "2020-03-30T22:18Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-03-30T04:24:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15423/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15453/1",
+    "modelCompletionTime": "2020-04-15T22:13Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-04-14T17:24Z",
+        "latitude": -2.0,
+        "longitude": -144.0,
+        "speed": 241.0,
+        "halfAngle": 25.0,
+        "time21_5": "2020-04-15T09:53Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-04-14T17:24:00-CME-001"
+      },
+      {
+        "cmeStartTime": "2020-04-14T21:54Z",
+        "latitude": -1.0,
+        "longitude": 31.0,
+        "speed": 232.0,
+        "halfAngle": 30.0,
+        "time21_5": "2020-04-15T15:51Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [
+          {
+            "catalog": null,
+            "activityID": "2020-04-20T01:20:00-IPS-001",
+            "location": "Earth",
+            "eventTime": "2020-04-20T01:20Z",
+            "submissionTime": null,
+            "versionId": 0,
+            "link": null,
+            "instruments": [
+              {
+                "displayName": "DSCOVR: PLASMAG"
+              }
+            ],
+            "linkedEvents": [],
+            "sentNotifications": []
+          }
+        ],
+        "cmeid": "2020-04-14T21:54:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15453/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15472/1",
+    "modelCompletionTime": "2020-04-28T11:39Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-04-27T13:54Z",
+        "latitude": -2.0,
+        "longitude": -15.0,
+        "speed": 317.0,
+        "halfAngle": 16.0,
+        "time21_5": "2020-04-28T01:15Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-04-27T13:54:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": "2020-05-01T18:00Z",
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": true,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15472/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15483/1",
+    "modelCompletionTime": "2020-04-30T20:59Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-04-29T09:12Z",
+        "latitude": 3.0,
+        "longitude": 61.0,
+        "speed": 348.0,
+        "halfAngle": 24.0,
+        "time21_5": "2020-04-29T20:45Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-04-29T09:12:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15483/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15490/1",
+    "modelCompletionTime": "2020-05-04T23:27Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-03T21:12Z",
+        "latitude": -6.0,
+        "longitude": 52.0,
+        "speed": 402.0,
+        "halfAngle": 11.0,
+        "time21_5": "2020-05-04T06:59Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-05-03T21:12:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15490/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15493/1",
+    "modelCompletionTime": "2020-05-06T10:48Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-05T14:48Z",
+        "latitude": -9.0,
+        "longitude": 101.0,
+        "speed": 267.0,
+        "halfAngle": 9.0,
+        "time21_5": "2020-05-06T10:09Z",
+        "featureCode": "null",
+        "isMostAccurate": false,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-05-05T14:48:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15493/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15499/1",
+    "modelCompletionTime": "2020-05-07T14:36Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-05T14:48Z",
+        "latitude": -3.0,
+        "longitude": 135.0,
+        "speed": 293.0,
+        "halfAngle": 12.0,
+        "time21_5": "2020-05-06T05:13Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-05-05T14:48:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": [
+      {
+        "isGlancingBlow": true,
+        "isMinorImpact": false,
+        "location": "Parker Solar Probe",
+        "arrivalTime": "2020-04-08T12:00Z"
+      }
+    ],
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15499/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15504/1",
+    "modelCompletionTime": "2020-05-10T11:03Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-09T19:36Z",
+        "latitude": -2.0,
+        "longitude": 85.0,
+        "speed": 257.0,
+        "halfAngle": 12.0,
+        "time21_5": "2020-05-10T10:09Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-05-09T19:36:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15504/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15510/1",
+    "modelCompletionTime": "2020-05-13T09:33Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-11T21:24Z",
+        "latitude": 4.0,
+        "longitude": -75.0,
+        "speed": 346.0,
+        "halfAngle": 11.0,
+        "time21_5": "2020-05-13T01:46Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-05-11T21:24:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15510/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15520/1",
+    "modelCompletionTime": "2020-05-16T13:33Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-15T04:38Z",
+        "latitude": -9.0,
+        "longitude": 39.0,
+        "speed": 282.0,
+        "halfAngle": 15.0,
+        "time21_5": "2020-05-15T18:52Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-05-15T04:38:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15520/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15533/1",
+    "modelCompletionTime": "2020-05-25T18:15Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-24T08:24Z",
+        "latitude": -3.0,
+        "longitude": -155.0,
+        "speed": 211.0,
+        "halfAngle": 15.0,
+        "time21_5": "2020-05-25T00:10Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-05-24T08:24:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15533/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15537/1",
+    "modelCompletionTime": "2020-05-26T17:44Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-26T00:39Z",
+        "latitude": -5.0,
+        "longitude": 10.0,
+        "speed": 266.0,
+        "halfAngle": 18.0,
+        "time21_5": "2020-05-26T15:13Z",
+        "featureCode": "LE",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-05-26T00:39:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": "2020-05-30T00:00Z",
+    "estimatedDuration": 12.0,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": 2,
+    "kp_135": 3,
+    "kp_180": 3,
+    "isEarthGB": true,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15537/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15547/1",
+    "modelCompletionTime": "2020-05-29T00:07Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-28T01:25Z",
+        "latitude": 4.0,
+        "longitude": 136.0,
+        "speed": 217.0,
+        "halfAngle": 24.0,
+        "time21_5": "2020-05-28T18:03Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-05-28T01:25:00-CME-001"
+      },
+      {
+        "cmeStartTime": "2020-05-28T11:00Z",
+        "latitude": 2.0,
+        "longitude": -114.0,
+        "speed": 264.0,
+        "halfAngle": 18.0,
+        "time21_5": "2020-05-28T23:37Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-05-28T11:00:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": [
+      {
+        "isGlancingBlow": false,
+        "isMinorImpact": false,
+        "location": "Parker Solar Probe",
+        "arrivalTime": "2020-05-30T02:11Z"
+      },
+      {
+        "isGlancingBlow": true,
+        "isMinorImpact": false,
+        "location": "OSIRIS-REx",
+        "arrivalTime": "2020-06-01T16:00Z"
+      }
+    ],
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15547/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15554/1",
+    "modelCompletionTime": "2020-05-30T13:10Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-05-30T02:12Z",
+        "latitude": -5.0,
+        "longitude": -50.0,
+        "speed": 411.0,
+        "halfAngle": 29.0,
+        "time21_5": "2020-05-30T13:03Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-05-30T02:12:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": [
+      {
+        "isGlancingBlow": false,
+        "isMinorImpact": false,
+        "location": "STEREO A",
+        "arrivalTime": "2020-06-02T13:18Z"
+      }
+    ],
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15554/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15570/1",
+    "modelCompletionTime": "2020-06-08T16:12Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-06-07T21:24Z",
+        "latitude": 2.0,
+        "longitude": -141.0,
+        "speed": 212.0,
+        "halfAngle": 25.0,
+        "time21_5": "2020-06-08T13:26Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-06-07T21:24:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15570/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15579/1",
+    "modelCompletionTime": "2020-06-13T13:09Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-06-12T13:48Z",
+        "latitude": 9.0,
+        "longitude": -107.0,
+        "speed": 291.0,
+        "halfAngle": 29.0,
+        "time21_5": "2020-06-13T08:22Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-06-12T13:48:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": [
+      {
+        "isGlancingBlow": true,
+        "isMinorImpact": false,
+        "location": "OSIRIS-REx",
+        "arrivalTime": "2020-06-17T08:00Z"
+      }
+    ],
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15579/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15586/1",
+    "modelCompletionTime": "2020-06-15T12:43Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-06-14T21:54Z",
+        "latitude": -18.0,
+        "longitude": -168.0,
+        "speed": 290.0,
+        "halfAngle": 18.0,
+        "time21_5": "2020-06-15T19:08Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "ipsList": [],
+        "cmeid": "2020-06-14T21:54:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15586/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15593/1",
+    "modelCompletionTime": "2020-06-21T11:50Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-06-21T04:12Z",
+        "latitude": -2.0,
+        "longitude": 41.0,
+        "speed": 333.0,
+        "halfAngle": 9.0,
+        "time21_5": "2020-06-21T13:11Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-06-21T04:12:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": [
+      {
+        "isGlancingBlow": true,
+        "isMinorImpact": false,
+        "location": "Mars",
+        "arrivalTime": "2020-06-26T12:00Z"
+      }
+    ],
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15593/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15596/1",
+    "modelCompletionTime": "2020-06-21T15:41Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-06-21T06:24Z",
+        "latitude": 3.0,
+        "longitude": -70.0,
+        "speed": 316.0,
+        "halfAngle": 10.0,
+        "time21_5": "2020-06-21T18:22Z",
+        "featureCode": "null",
+        "isMostAccurate": false,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-06-21T06:24:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": [
+      {
+        "isGlancingBlow": true,
+        "isMinorImpact": false,
+        "location": "STEREO A",
+        "arrivalTime": "2020-06-25T04:00Z"
+      }
+    ],
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15596/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15600/1",
+    "modelCompletionTime": "2020-06-22T17:44Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-06-21T06:24Z",
+        "latitude": -4.0,
+        "longitude": -43.0,
+        "speed": 440.0,
+        "halfAngle": 15.0,
+        "time21_5": "2020-06-21T15:31Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-06-21T06:24:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15600/-1"
+  },
+  {
+    "simulationID": "WSA-ENLIL/15603/1",
+    "modelCompletionTime": "2020-06-23T19:25Z",
+    "au": 2.0,
+    "cmeInputs": [
+      {
+        "cmeStartTime": "2020-06-22T15:09Z",
+        "latitude": -8.0,
+        "longitude": 19.0,
+        "speed": 208.0,
+        "halfAngle": 13.0,
+        "time21_5": "2020-06-23T07:22Z",
+        "featureCode": "null",
+        "isMostAccurate": true,
+        "levelOfData": 1,
+        "ipsList": [],
+        "cmeid": "2020-06-22T15:09:00-CME-001"
+      }
+    ],
+    "estimatedShockArrivalTime": null,
+    "estimatedDuration": null,
+    "rmin_re": null,
+    "kp_18": null,
+    "kp_90": null,
+    "kp_135": null,
+    "kp_180": null,
+    "isEarthGB": false,
+    "isEarthMinorImpact": false,
+    "impactList": null,
+    "link": "https://webtools.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/15603/-1"
+  }
+]

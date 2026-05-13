@@ -14,282 +14,358 @@ Usage :
 """
 # data_collection.py — version corrigée NOAA trimestrielle
 
+"""
+data_collection.py
+Projet Aurores Boréales
+"""
+
 import os
-import re
+import json
 import time
+import logging
 import requests
 import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
+
+from datetime import datetime
 from dotenv import load_dotenv
 
-# ─────────────────────────────────────────────
-# 0. Configuration
-# ─────────────────────────────────────────────
+# -------------------------------------------------
+# CONFIG
+# -------------------------------------------------
 
 load_dotenv()
+
 NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
 
 YEARS = [2019, 2020, 2021, 2022, 2023]
 
-OUTPUT_DIR = "data"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+RAW_DIR = "data/raw"
+DATA_DIR = "data"
 
+os.makedirs(RAW_DIR, exist_ok=True)
+os.makedirs(DATA_DIR, exist_ok=True)
 
-# ─────────────────────────────────────────────
-# 1. NOAA — Kp / Ap
-# ─────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+log = logging.getLogger(__name__)
 
+# -------------------------------------------------
+# NOAA
+# -------------------------------------------------
 
-def fetch_noaa_kp_year(year: int) -> pd.DataFrame:
-    """
-    Télécharge les 4 fichiers trimestriels NOAA
-    et extrait les Kp planétaires toutes les 3 heures.
-    """
-    base_url = (
+def fetch_noaa_quarter(year: int, quarter: int) -> str:
+    filename = f"{year}Q{quarter}_DGD.txt"
+    cache_file = os.path.join(RAW_DIR, filename)
+
+    if os.path.exists(cache_file):
+        log.info(f"[NOAA] cache trouvé : {filename}")
+        with open(cache_file, "r", encoding="utf-8") as f:
+            return f.read()
+
+    url = (
         "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/"
-        "annual_reports/daily_solar_indices_summaries/daily_geomagnetic_data"
+        "annual_reports/daily_solar_indices_summaries/"
+        f"daily_geomagnetic_data/{filename}"
     )
 
-    rows = []
-
-    for quarter in range(1, 5):
-        url = f"{base_url}/{year}Q{quarter}_DGD.txt"
-        print(f"  [NOAA] Téléchargement {year} Q{quarter}...")
-
-        try:
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            print(f"  [NOAA] Erreur {year} Q{quarter}: {e}")
-            continue
-
-        for line in response.text.splitlines():
-            line = line.strip()
-
-            if not line:
-                continue
-
-            # garder seulement les lignes qui commencent par l'année
-            if not line.startswith(str(year)):
-                continue
-
-            # extrait tous les entiers (gère aussi les valeurs collées comme 3-1-1)
-            nums = re.findall(r"-?\d+", line)
-
-            # format attendu :
-            # 3 nombres date + 9 middle + 9 high + 9 planetary = 30
-            if len(nums) < 30:
-                continue
-
-            try:
-                yyyy, mm, dd = map(int, nums[:3])
-                date = datetime(yyyy, mm, dd)
-            except ValueError:
-                continue
-
-            # Les 9 derniers = Planetary A + 8 Kp
-            planetary = nums[-9:]
-
-            try:
-                ap_val = float(planetary[0])
-            except ValueError:
-                ap_val = np.nan
-
-            kp_values = planetary[1:]
-
-            for i, hour in enumerate([0, 3, 6, 9, 12, 15, 18, 21]):
-                try:
-                    kp_val = float(kp_values[i])
-                except (ValueError, IndexError):
-                    continue
-
-                rows.append({
-                    "timestamp": date + timedelta(hours=hour),
-                    "kp_index": kp_val,
-                    "ap_index": ap_val if ap_val >= 0 else np.nan,
-                })
-
-        time.sleep(0.2)
-
-    df = pd.DataFrame(rows)
-
-    if df.empty:
-        print(f"  [NOAA] {year} → 0 ligne")
-        return df
-
-    df = df.drop_duplicates(subset=["timestamp"])
-    df = df.sort_values("timestamp").reset_index(drop=True)
-
-    print(f"  [NOAA] {year} → {len(df)} lignes collectées")
-    return df
-
-
-
-def fetch_all_noaa(years: list) -> pd.DataFrame:
-    frames = []
-
-    for year in years:
-        df = fetch_noaa_kp_year(year)
-        if not df.empty:
-            frames.append(df)
-        time.sleep(0.5)
-
-    if not frames:
-        raise RuntimeError("Aucune donnée NOAA collectée.")
-
-    result = pd.concat(frames, ignore_index=True)
-    result = result.sort_values("timestamp").reset_index(drop=True)
-
-    print(f"\n[NOAA] Total : {len(result)} lignes\n")
-    return result
-
-
-# ─────────────────────────────────────────────
-# 2. NASA
-# ─────────────────────────────────────────────
-
-
-def fetch_nasa_wsaenlil(start_date: str, end_date: str) -> pd.DataFrame:
-    url = "https://api.nasa.gov/DONKI/WSAEnlilSimulations"
-    params = {
-        "startDate": start_date,
-        "endDate": end_date,
-        "api_key": NASA_API_KEY,
-    }
+    log.info(f"[NOAA] téléchargement {filename}")
 
     try:
-        response = requests.get(url, params=params, timeout=30)
+        response = requests.get(url, timeout=30)
         response.raise_for_status()
-        data = response.json()
-    except requests.RequestException:
-        return pd.DataFrame()
 
+        with open(cache_file, "w", encoding="utf-8") as f:
+            f.write(response.text)
+
+        return response.text
+
+    except requests.RequestException as e:
+        log.warning(f"[NOAA] erreur {filename} : {e}")
+        return ""
+
+
+def parse_noaa_quarter(raw_text: str) -> pd.DataFrame:
     rows = []
 
-    for sim in data:
+    for line in raw_text.splitlines():
+        line = line.strip()
+
+        if (
+            not line
+            or line.startswith("#")
+            or line.startswith(":")
+        ):
+            continue
+
+        parts = line.split()
+
+        # Format attendu :
+        # YYYY MM DD + données...
+        if len(parts) < 29:
+            continue
+
         try:
-            ts = sim.get("modelCompletionTime")
-            if not ts:
-                continue
+            year = int(parts[0])
+            month = int(parts[1])
+            day = int(parts[2])
 
-            timestamp = datetime.strptime(ts[:16], "%Y-%m-%dT%H:%M")
+            # bloc planétaire commence à index 21
+            ap_index = float(parts[21])
 
-            for impact in sim.get("impactList", []):
+            kp_values = []
+            for i in range(22, 30):
+                val = parts[i].replace("-1", " -1 ").split()
+                kp_values.extend(val)
+
+            kp_values = kp_values[:8]
+
+            date = datetime(year, month, day)
+
+            for idx, kp_raw in enumerate(kp_values):
+                try:
+                    kp = float(kp_raw)
+                except ValueError:
+                    continue
+
+                if kp < 0:
+                    continue
+
+                ts = date + pd.Timedelta(hours=idx * 3)
+
                 rows.append({
-                    "timestamp": timestamp,
-                    "solar_wind_speed": float(impact.get("speed", np.nan) or np.nan),
-                    "solar_wind_density": np.nan,
-                    "bz_component": float(impact.get("bz", np.nan) or np.nan),
+                    "timestamp": ts,
+                    "kp_index": kp,
+                    "ap_index": ap_index
                 })
+
         except Exception:
             continue
 
     return pd.DataFrame(rows)
 
 
-
-def fetch_all_nasa(years: list) -> pd.DataFrame:
+def fetch_all_noaa(years):
     frames = []
 
     for year in years:
-        for m_start, m_end in [("01-01", "06-30"), ("07-01", "12-31")]:
-            start = f"{year}-{m_start}"
-            end = f"{year}-{m_end}"
+        yearly = []
 
-            df = fetch_nasa_wsaenlil(start, end)
-            if not df.empty:
-                frames.append(df)
+        for quarter in range(1, 5):
+            raw = fetch_noaa_quarter(year, quarter)
+
+            if raw:
+                df = parse_noaa_quarter(raw)
+
+                if not df.empty:
+                    yearly.append(df)
+
+            time.sleep(0.3)
+
+        if yearly:
+            df_year = pd.concat(yearly, ignore_index=True)
+            log.info(f"[NOAA] {year} → {len(df_year)} lignes")
+            frames.append(df_year)
+
+    if not frames:
+        raise RuntimeError("Aucune donnée NOAA collectée.")
+
+    df = pd.concat(frames, ignore_index=True)
+    df = df.sort_values("timestamp").reset_index(drop=True)
+
+    log.info(f"[NOAA] total → {len(df)} lignes")
+    return df
+
+
+# -------------------------------------------------
+# NASA
+# -------------------------------------------------
+
+def fetch_nasa_period(start_date: str, end_date: str):
+    cache_name = f"nasa_wsa_{start_date}_{end_date}.json"
+    cache_file = os.path.join(RAW_DIR, cache_name)
+
+    if os.path.exists(cache_file):
+        log.info(f"[NASA] cache trouvé {cache_name}")
+        with open(cache_file, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    # Utilisation de WSAEnlilSimulations car GST ne contient pas la vitesse/densité du vent solaire
+    url = "https://api.nasa.gov/DONKI/WSAEnlilSimulations"
+
+    params = {
+        "startDate": start_date,
+        "endDate": end_date,
+        "api_key": NASA_API_KEY
+    }
+
+    log.info(f"[NASA] requête WSA {start_date} → {end_date}")
+
+    try:
+        response = requests.get(url, params=params, timeout=30)
+        log.info(f"[NASA] HTTP {response.status_code}")
+        response.raise_for_status()
+
+        data = response.json()
+
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+        log.info(f"[NASA] {len(data)} simulations trouvées")
+        return data
+
+    except requests.RequestException as e:
+        log.warning(f"[NASA] erreur : {e}")
+        return []
+
+
+def parse_nasa(raw_simulations):
+    rows = []
+
+    for sim in raw_simulations:
+        try:
+            # 1. Vitesse de référence depuis cmeInputs
+            fallback_speed = np.nan
+            cme_inputs = sim.get("cmeInputs")
+            if cme_inputs and len(cme_inputs) > 0:
+                fallback_speed = float(cme_inputs[0].get("speed", np.nan) or np.nan)
+
+            # 2. Chercher les impacts sur Terre
+            impacts = sim.get("impactList") or []
+            earth_impacts = [i for i in impacts if i.get("location") == "Earth"]
+
+            if earth_impacts:
+                for impact in earth_impacts:
+                    ts_str = impact.get("arrivalTime")
+                    if not ts_str:
+                        continue
+                    timestamp = datetime.strptime(ts_str[:16], "%Y-%m-%dT%H:%M")
+                    
+                    rows.append({
+                        "timestamp": timestamp,
+                        "solar_wind_speed": float(impact.get("speed", fallback_speed) or fallback_speed),
+                        "solar_wind_density": float(impact.get("density", np.nan) or np.nan),
+                        "bz_component": float(impact.get("bz", np.nan) or np.nan),
+                    })
+            
+            # 3. Fallback : estimatedShockArrivalTime si Terre touchée
+            elif sim.get("isEarthGB") or sim.get("isEarthMinorImpact"):
+                ts_str = sim.get("estimatedShockArrivalTime")
+                if ts_str:
+                    timestamp = datetime.strptime(ts_str[:16], "%Y-%m-%dT%H:%M")
+                    rows.append({
+                        "timestamp": timestamp,
+                        "solar_wind_speed": fallback_speed,
+                        "solar_wind_density": np.nan,
+                        "bz_component": np.nan,
+                    })
+        except Exception:
+            continue
+
+    return pd.DataFrame(rows)
+
+
+def fetch_all_nasa(years):
+    frames = []
+
+    for year in years:
+        periods = [
+            (f"{year}-01-01", f"{year}-06-30"),
+            (f"{year}-07-01", f"{year}-12-31")
+        ]
+
+        for start, end in periods:
+            raw = fetch_nasa_period(start, end)
+
+            if raw:
+                df = parse_nasa(raw)
+
+                if not df.empty:
+                    frames.append(df)
 
             time.sleep(1)
 
     if not frames:
+        log.warning("[NASA] aucune donnée collectée")
         return pd.DataFrame()
 
-    result = pd.concat(frames, ignore_index=True)
-    result = result.drop_duplicates(subset=["timestamp"])
-    result = result.sort_values("timestamp").reset_index(drop=True)
+    df = pd.concat(frames, ignore_index=True)
+    df = df.sort_values("timestamp").drop_duplicates().reset_index(drop=True)
 
-    return result
-
-
-# ─────────────────────────────────────────────
-# 3. Feature engineering
-# ─────────────────────────────────────────────
-
-SOLAR_MAXIMA_YEARS = {2023, 2024, 2025}
+    log.info(f"[NASA] total → {len(df)} événements")
+    return df
 
 
+# -------------------------------------------------
+# FEATURE ENGINEERING
+# -------------------------------------------------
 
-def get_season(month: int) -> str:
-    if month in (12, 1, 2):
-        return "hiver"
-    if month in (3, 4, 5):
-        return "printemps"
-    if month in (6, 7, 8):
-        return "ete"
-    return "automne"
-
-
-
-def add_features(df: pd.DataFrame) -> pd.DataFrame:
+def add_features(df):
     df = df.copy()
 
     df["month"] = df["timestamp"].dt.month
-    df["season"] = df["month"].apply(get_season)
+
+    def season(m):
+        if m in [12, 1, 2]:
+            return "hiver"
+        elif m in [3, 4, 5]:
+            return "printemps"
+        elif m in [6, 7, 8]:
+            return "ete"
+        return "automne"
+
+    df["season"] = df["month"].apply(season)
+
     df["hour_interval"] = df["timestamp"].dt.hour.apply(
-        lambda h: f"{h:02d}h-{(h + 3):02d}h"
+        lambda h: f"{h:02d}h-{h+3:02d}h"
     )
 
     df["is_solar_maximum"] = df["timestamp"].dt.year.apply(
-        lambda y: 1 if y in SOLAR_MAXIMA_YEARS else 0
+        lambda y: 1 if y >= 2023 else 0
     )
 
-    df = df.sort_values("timestamp").reset_index(drop=True)
     df["kp_previous_interval"] = df["kp_index"].shift(1)
 
-    if "bz_component" in df.columns:
-        df["bz_negative"] = (df["bz_component"] < 0).astype(int)
-    else:
-        df["bz_negative"] = np.nan
+    if "bz_component" not in df.columns:
+        df["bz_component"] = np.nan
 
+    df["bz_negative"] = (df["bz_component"] < 0).astype(int)
     df["aurora_visible"] = (df["kp_index"] >= 5).astype(int)
 
     return df
 
 
-# ─────────────────────────────────────────────
-# 4. Fusion
-# ─────────────────────────────────────────────
+# -------------------------------------------------
+# MERGE
+# -------------------------------------------------
 
-
-def merge_noaa_nasa(df_noaa: pd.DataFrame, df_nasa: pd.DataFrame) -> pd.DataFrame:
+def merge_noaa_nasa(df_noaa, df_nasa):
     if df_nasa.empty:
         df_noaa["solar_wind_speed"] = np.nan
         df_noaa["solar_wind_density"] = np.nan
         df_noaa["bz_component"] = np.nan
         return df_noaa
 
-    df_nasa = df_nasa[[
-        "timestamp",
-        "solar_wind_speed",
-        "solar_wind_density",
-        "bz_component",
-    ]].drop_duplicates("timestamp")
-
-    return pd.merge_asof(
+    merged = pd.merge_asof(
         df_noaa.sort_values("timestamp"),
         df_nasa.sort_values("timestamp"),
         on="timestamp",
         direction="nearest",
-        tolerance=pd.Timedelta("6h"),
+        tolerance=pd.Timedelta("6h")
     )
 
+    # Diagnostic
+    n_matches = merged["solar_wind_speed"].notna().sum()
+    log.info(f"[Fusion] {n_matches} correspondances NASA trouvées sur {len(merged)} lignes NOAA.")
 
-# ─────────────────────────────────────────────
-# 5. Main
-# ─────────────────────────────────────────────
+    return merged
 
+
+# -------------------------------------------------
+# MAIN
+# -------------------------------------------------
 
 def main():
     print("=" * 50)
@@ -308,8 +384,26 @@ def main():
     print("\n── Feature engineering ──")
     df = add_features(df)
 
-    dataset_path = os.path.join(OUTPUT_DIR, "dataset.csv")
-    sample_path = os.path.join(OUTPUT_DIR, "sample.csv")
+    final_columns = [
+        "timestamp",
+        "kp_index",
+        "ap_index",
+        "solar_wind_speed",
+        "solar_wind_density",
+        "bz_component",
+        "month",
+        "season",
+        "hour_interval",
+        "is_solar_maximum",
+        "kp_previous_interval",
+        "bz_negative",
+        "aurora_visible"
+    ]
+
+    df = df[[c for c in final_columns if c in df.columns]]
+
+    dataset_path = os.path.join(DATA_DIR, "dataset.csv")
+    sample_path = os.path.join(DATA_DIR, "sample.csv")
 
     df.to_csv(dataset_path, index=False)
     df.head(100).to_csv(sample_path, index=False)

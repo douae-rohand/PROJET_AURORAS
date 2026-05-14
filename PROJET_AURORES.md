@@ -31,11 +31,11 @@ Classification supervisée **binaire** :
 - **Quota** : Accès libre par fichiers, aucune clé requise
 - **Format** : Fichiers JSON/texte par année
 
-### Source 2 — NASA DONKI API
-- **URL** : https://api.nasa.gov / https://kauai.ccmc.gsfc.nasa.gov/DONKI
-- **Données** : Événements du vent solaire (vitesse, densité, composante Bz)
-- **Quota** : 1000 requêtes/heure avec clé gratuite (api.nasa.gov)
-- **Format** : JSON
+### Source 2 — NASA HAPI / OMNIWeb
+- **URL** : https://cdaweb.gsfc.nasa.gov/hapi
+- **Données** : Vent solaire continu (vitesse, densité, composante Bz)
+- **Quota** : Accès libre, agrégation par mois recommandée
+- **Format** : CSV / JSON
 
 ---
 

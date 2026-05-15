@@ -22,35 +22,31 @@ Nous fusionnons deux sources professionnelles pour construire le dataset :
 
 ---
 
-## 📊 3. Détails du Dataset et des Features
-Le dataset final sera une série temporelle continue (pas de 1 heure) sur une période de 5 ans (2019-2023).
+## 📊 3. Structure du Dataset Final (10 Features)
+Le dataset est une série temporelle horaire (2019-2023) contenant les variables suivantes :
 
-### A. Features Numériques (Brutes de l'API NASA OMNI2)
-1.  **`solar_wind_speed`** : Vitesse du vent (km/s).
-2.  **`solar_wind_density`** : Concentration de particules.
-3.  **`bz_component`** : Force magnétique (nT).
-
-### B. Features Catégorielles & Engineered (Calculées par Python)
-4.  **`month`** : Extrait du timestamp (1 à 12).
-5.  **`season`** : Déduit du mois (Hiver, Printemps, Été, Automne).
-6.  **`hour_interval`** : Tranche horaire (0-3h, 3-6h, etc.).
-7.  **`bz_negative`** : `1` si `bz_component < 0`, sinon `0`.
-8.  **`is_solar_maximum`** : `1` pour les années de forte activité (ex: 2023), `0` pour les années calmes.
-9.  **`timestamp`** : L'index temporel de la ligne.
-
-### C. La Cible (Y)
-10. **`is_storm`** : `1` si correspondance avec l'API DONKI, `0` sinon.
+| Feature | Source | Description | Impact ML |
+| :--- | :--- | :--- | :--- |
+| `solar_wind_speed` | OMNI2 (W25) | Vitesse du vent solaire (km/s) | Primaire |
+| `solar_wind_density` | OMNI2 (W24) | Densité de protons (n/cc) | Primaire |
+| `bz_component` | OMNI2 (W17) | Champ magnétique Bz GSM (nT) | Critique |
+| `dst_index` | OMNI2 (W41) | État géomagnétique terrestre (nT) | Très Haut |
+| `solar_wind_pressure` | Calculé | Pression dynamique (Densité * Vitesse²) | Physique |
+| `bz_min_3h` | Rolling | Minimum de Bz sur les 3 dernières heures | Persistance |
+| `sin_month` / `cos_month` | Cyclique | Encodage du mois (Saisonnalité) | Temporel |
+| `bz_negative` | Booléen | Indique si Bz < 0 (Interconnexion) | Physique |
+| `is_solar_maximum` | Cycle | Binaire (1 si année >= 2022) | Cycle de 11 ans |
+| **`is_storm`** | **Cible** | **Variable Cible (1 si tempête à T+6h)** | **Target** |
 
 ---
 
-## ⚙️ 4. Procédure de Construction (Le "Merge")
-1.  Générer une grille de temps vide de **43 800 lignes** (24h * 365j * 5 ans).
-2.  Remplir les colonnes météo avec les données continues de la NOAA (DSCOVR/ACE).
-3.  Télécharger le catalogue JSON de la NASA DONKI.
-4.  **Le Mapping (avec Padding)** : Pour garantir le respect du ratio de classe (5-25%), on élargit la fenêtre de tempête :
-    *   `is_storm = 1` si l'heure est comprise entre **T-24h** et **T+72h** d'un événement DONKI.
-    *   Cela permet de capturer les phases de montée et de récupération de la tempête.
-5.  **Le Lag (Décalage)** : Décaler les mesures météo de 6 heures par rapport à la cible pour créer un modèle **prédictif** (prédire le futur avec le passé).
+## ⚙️ 4. Procédure de Construction et Nettoyage
+1.  **Time Grid** : Génération d'une grille continue de ~43 800 lignes.
+2.  **Collection OMNI2** : Téléchargement et parsing précis des colonnes physiques de la NASA.
+3.  **Feature Engineering** : Calcul de la pression dynamique et des moyennes glissantes (Bz).
+4.  **Le Mapping (avec Padding)** : Elargissement des événements DONKI (T-24h à T+72h) pour un ratio de classe optimal (~8.5%).
+5.  **Le Lag (Décalage)** : Décalage des features de **6 heures** pour garantir une capacité prédictive réelle.
+6.  **Nettoyage Final** : Suppression automatique des lignes `NaN` générées par le lag et les rolling windows.
 
 ---
 

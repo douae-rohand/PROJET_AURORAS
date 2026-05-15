@@ -197,7 +197,7 @@ def collect_solar_wind_omni(start_year, end_year):
             parsed_count = 0
             for line in lines:
                 parts = line.split()
-                if len(parts) < 20:
+                if len(parts) < 45:
                     continue
                 
                 try:
@@ -205,17 +205,21 @@ def collect_solar_wind_omni(start_year, end_year):
                     doy = int(parts[1])
                     hr = int(parts[2])
                     
-                    # solar_wind_speed (idx 6) - sentinel 9999.9
-                    speed = float(parts[6])
+                    # solar_wind_speed (Word 25 -> idx 24) - sentinel 9999.
+                    speed = float(parts[24])
                     if speed >= 9000: speed = None
                     
-                    # solar_wind_density (idx 7) - sentinel 999.9
-                    density = float(parts[7])
+                    # solar_wind_density (Word 24 -> idx 23) - sentinel 999.9
+                    density = float(parts[23])
                     if density >= 999: density = None
                     
-                    # bz_component (idx 14) - sentinel 999.9
-                    bz = float(parts[14])
+                    # bz_component (Word 17: Bz GSM -> idx 16) - sentinel 999.9
+                    bz = float(parts[16])
                     if abs(bz) >= 999: bz = None
+                    
+                    # dst_index (Word 41 -> idx 40) - sentinel 99999
+                    dst = float(parts[40])
+                    if abs(dst) >= 9999: dst = None
                     
                     # Conversion timestamp (naive)
                     timestamp = datetime(yr, 1, 1) + timedelta(days=doy - 1, hours=hr)
@@ -224,7 +228,8 @@ def collect_solar_wind_omni(start_year, end_year):
                         'timestamp': timestamp,
                         'solar_wind_speed': speed,
                         'solar_wind_density': density,
-                        'bz_component': bz
+                        'bz_component': bz,
+                        'dst_index': dst
                     })
                     parsed_count += 1
                 except (ValueError, IndexError):
@@ -302,6 +307,16 @@ def add_engineered_features(df):
     # Hour interval (par blocs de 3h)
     df['hour_interval'] = df['hour_tmp'].apply(lambda h: f"{(h//3)*3}h-{(h//3)*3+3}h")
     
+    # Cyclic encoding for month (Russell-McPherron effect)
+    df['sin_month'] = np.sin(2 * np.pi * df['month'] / 12)
+    df['cos_month'] = np.cos(2 * np.pi * df['month'] / 12)
+    
+    # solar_wind_pressure (Force physique de compression)
+    df['solar_wind_pressure'] = df['solar_wind_density'] * (df['solar_wind_speed']**2)
+    
+    # bz_min_3h (Capture la persistance du Bz négatif)
+    df['bz_min_3h'] = df['bz_component'].rolling(window=3).min()
+    
     # bz_negative (indicateur physique de pénétration de l'énergie solaire)
     df['bz_negative'] = df['bz_component'].apply(lambda x: 1 if x < 0 else (0 if pd.notnull(x) else np.nan))
     
@@ -324,10 +339,16 @@ def apply_lag(df, lag_hours=6):
         pd.DataFrame: DataFrame avec lag appliqué.
     """
     logging.info("=== APPLY_LAG ===")
-    cols_to_lag = ['solar_wind_speed', 'solar_wind_density', 'bz_component', 'bz_negative']
+    cols_to_lag = [
+        'solar_wind_speed', 'solar_wind_density', 'bz_component', 
+        'bz_negative', 'solar_wind_pressure', 'bz_min_3h', 'dst_index'
+    ]
     
     logging.info(f"Application d'un lag de {lag_hours} heures.")
     df[cols_to_lag] = df[cols_to_lag].shift(lag_hours)
+    
+    # Nettoyage final : suppression des premières lignes vides (Rolling window + Lag)
+    df.dropna(subset=cols_to_lag, inplace=True)
     
     return df
 
@@ -339,7 +360,9 @@ def save_and_verify(df, output_path='data/dataset.csv', sample_path='data/sample
     
     columns_order = [
         'timestamp', 'solar_wind_speed', 'solar_wind_density', 'bz_component',
-        'month', 'season', 'hour_interval', 'bz_negative', 'is_solar_maximum', 'is_storm'
+        'solar_wind_pressure', 'bz_min_3h', 'dst_index',
+        'month', 'sin_month', 'cos_month', 'season', 'hour_interval', 
+        'bz_negative', 'is_solar_maximum', 'is_storm'
     ]
     df = df[columns_order]
     

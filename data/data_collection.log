@@ -1,275 +1,200 @@
-2026-05-14 23:34:17,994 - INFO - === GENERATE_TIME_GRID ===
-2026-05-14 23:34:18,052 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
-2026-05-14 23:34:18,053 - INFO - === COLLECT_STORMS_DONKI ===
-2026-05-14 23:34:18,054 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 à 2019-12-31)
-2026-05-14 23:34:19,988 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:19,989 - INFO - Trouvé 3 tempêtes en 2019
-2026-05-14 23:34:20,490 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 à 2020-12-31)
-2026-05-14 23:34:22,202 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:22,202 - INFO - Trouvé 1 tempêtes en 2020
-2026-05-14 23:34:22,703 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 à 2021-12-31)
-2026-05-14 23:34:24,245 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:24,245 - INFO - Trouvé 5 tempêtes en 2021
-2026-05-14 23:34:24,746 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 à 2022-12-31)
-2026-05-14 23:34:26,504 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:26,506 - INFO - Trouvé 10 tempêtes en 2022
-2026-05-14 23:34:27,007 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 à 2023-12-31)
-2026-05-14 23:34:28,242 - INFO - Statut HTTP reçu : 429
-2026-05-14 23:34:28,242 - ERROR - Erreur réseau pour 2023: 429 Client Error: Too Many Requests for url: https://api.nasa.gov/DONKI/GST?startDate=2023-01-01&endDate=2023-12-31&api_key=DEMO_KEY
-2026-05-14 23:34:28,747 - INFO - Données brutes sauvegardées dans data\raw\storms_donki.json
-2026-05-14 23:34:28,820 - INFO - Total tempêtes collectées : 19
-2026-05-14 23:34:28,824 - INFO - === CREATE_TARGET_VARIABLE ===
-2026-05-14 23:34:28,906 - INFO - Heures marquées 1 : 1351 (3.08%)
-2026-05-14 23:34:28,906 - WARNING - Le pourcentage est encore inférieur à 5%. Envisagez d'élargir encore les fenêtres.
-2026-05-14 23:34:28,907 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
-2026-05-14 23:34:28,907 - INFO - Téléchargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
-2026-05-14 23:34:30,505 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:30,600 - INFO - Année 2019 : 8760 lignes parsées.
-2026-05-14 23:34:30,600 - INFO - Téléchargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
-2026-05-14 23:34:32,136 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:32,198 - INFO - Année 2020 : 8784 lignes parsées.
-2026-05-14 23:34:32,200 - INFO - Téléchargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
-2026-05-14 23:34:36,538 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:36,607 - INFO - Année 2021 : 8760 lignes parsées.
-2026-05-14 23:34:36,607 - INFO - Téléchargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
-2026-05-14 23:34:39,156 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:39,218 - INFO - Année 2022 : 8760 lignes parsées.
-2026-05-14 23:34:39,218 - INFO - Téléchargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
-2026-05-14 23:34:40,722 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:34:40,786 - INFO - Année 2023 : 8760 lignes parsées.
-2026-05-14 23:34:40,984 - INFO - Données brutes sauvegardées dans data\raw\omni_solar_wind.parquet
-2026-05-14 23:34:40,993 - INFO - === MERGE_DATASETS ===
-2026-05-14 23:34:41,056 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 5)
-2026-05-14 23:34:41,064 - INFO - NaN par colonne après merge :
+2026-05-15 14:34:30,764 - INFO - === GENERATE_TIME_GRID ===
+2026-05-15 14:34:30,771 - INFO - Grille gï¿½nï¿½rï¿½e : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
+2026-05-15 14:34:30,772 - INFO - === COLLECT_STORMS_DONKI ===
+2026-05-15 14:34:30,772 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 ï¿½ 2019-12-31)
+2026-05-15 14:34:30,780 - ERROR - Erreur rï¿½seau pour 2019: HTTPSConnectionPool(host='api.nasa.gov', port=443): Max retries exceeded with url: /DONKI/GST?startDate=2019-01-01&endDate=2019-12-31&api_key=4xhlOVIvKPBcHqGIeTHtZ8UfaAfZ5qKnZEuGzDxt (Caused by NameResolutionError("HTTPSConnection(host='api.nasa.gov', port=443): Failed to resolve 'api.nasa.gov' ([Errno 11001] getaddrinfo failed)"))
+2026-05-15 14:34:32,781 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 ï¿½ 2020-12-31)
+2026-05-15 14:34:32,786 - ERROR - Erreur rï¿½seau pour 2020: HTTPSConnectionPool(host='api.nasa.gov', port=443): Max retries exceeded with url: /DONKI/GST?startDate=2020-01-01&endDate=2020-12-31&api_key=4xhlOVIvKPBcHqGIeTHtZ8UfaAfZ5qKnZEuGzDxt (Caused by NameResolutionError("HTTPSConnection(host='api.nasa.gov', port=443): Failed to resolve 'api.nasa.gov' ([Errno 11001] getaddrinfo failed)"))
+2026-05-15 14:34:34,787 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 ï¿½ 2021-12-31)
+2026-05-15 14:34:34,792 - ERROR - Erreur rï¿½seau pour 2021: HTTPSConnectionPool(host='api.nasa.gov', port=443): Max retries exceeded with url: /DONKI/GST?startDate=2021-01-01&endDate=2021-12-31&api_key=4xhlOVIvKPBcHqGIeTHtZ8UfaAfZ5qKnZEuGzDxt (Caused by NameResolutionError("HTTPSConnection(host='api.nasa.gov', port=443): Failed to resolve 'api.nasa.gov' ([Errno 11001] getaddrinfo failed)"))
+2026-05-15 14:34:36,794 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 ï¿½ 2022-12-31)
+2026-05-15 14:34:36,798 - ERROR - Erreur rï¿½seau pour 2022: HTTPSConnectionPool(host='api.nasa.gov', port=443): Max retries exceeded with url: /DONKI/GST?startDate=2022-01-01&endDate=2022-12-31&api_key=4xhlOVIvKPBcHqGIeTHtZ8UfaAfZ5qKnZEuGzDxt (Caused by NameResolutionError("HTTPSConnection(host='api.nasa.gov', port=443): Failed to resolve 'api.nasa.gov' ([Errno 11001] getaddrinfo failed)"))
+2026-05-15 14:34:38,800 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 ï¿½ 2023-12-31)
+2026-05-15 14:34:38,804 - ERROR - Erreur rï¿½seau pour 2023: HTTPSConnectionPool(host='api.nasa.gov', port=443): Max retries exceeded with url: /DONKI/GST?startDate=2023-01-01&endDate=2023-12-31&api_key=4xhlOVIvKPBcHqGIeTHtZ8UfaAfZ5qKnZEuGzDxt (Caused by NameResolutionError("HTTPSConnection(host='api.nasa.gov', port=443): Failed to resolve 'api.nasa.gov' ([Errno 11001] getaddrinfo failed)"))
+2026-05-15 14:38:23,586 - INFO - === GENERATE_TIME_GRID ===
+2026-05-15 14:38:23,593 - INFO - Grille gï¿½nï¿½rï¿½e : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
+2026-05-15 14:38:23,593 - INFO - === COLLECT_STORMS_DONKI ===
+2026-05-15 14:38:23,594 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 ï¿½ 2019-12-31)
+2026-05-15 14:38:25,716 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:38:25,717 - INFO - Trouvï¿½ 3 tempï¿½tes en 2019
+2026-05-15 14:38:27,718 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 ï¿½ 2020-12-31)
+2026-05-15 14:38:29,434 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:38:29,434 - INFO - Trouvï¿½ 1 tempï¿½tes en 2020
+2026-05-15 14:38:31,435 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 ï¿½ 2021-12-31)
+2026-05-15 14:38:33,682 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:38:33,682 - INFO - Trouvï¿½ 5 tempï¿½tes en 2021
+2026-05-15 14:42:17,854 - INFO - === GENERATE_TIME_GRID ===
+2026-05-15 14:42:17,862 - INFO - Grille gï¿½nï¿½rï¿½e : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
+2026-05-15 14:42:17,862 - INFO - === COLLECT_STORMS_DONKI ===
+2026-05-15 14:42:17,863 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 ï¿½ 2019-12-31)
+2026-05-15 14:42:20,402 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:20,403 - INFO - Trouvï¿½ 3 tempï¿½tes en 2019
+2026-05-15 14:42:22,404 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 ï¿½ 2020-12-31)
+2026-05-15 14:42:24,514 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:24,515 - INFO - Trouvï¿½ 1 tempï¿½tes en 2020
+2026-05-15 14:42:26,516 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 ï¿½ 2021-12-31)
+2026-05-15 14:42:29,038 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:29,038 - INFO - Trouvï¿½ 5 tempï¿½tes en 2021
+2026-05-15 14:42:31,040 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 ï¿½ 2022-12-31)
+2026-05-15 14:42:33,680 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:33,681 - INFO - Trouvï¿½ 10 tempï¿½tes en 2022
+2026-05-15 14:42:35,682 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 ï¿½ 2023-12-31)
+2026-05-15 14:42:39,731 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:39,732 - INFO - Trouvï¿½ 16 tempï¿½tes en 2023
+2026-05-15 14:42:41,743 - INFO - Donnï¿½es brutes sauvegardï¿½es dans data\raw\storms_donki.json
+2026-05-15 14:42:41,927 - INFO - Total tempï¿½tes collectï¿½es : 35
+2026-05-15 14:42:41,931 - INFO - === CREATE_TARGET_VARIABLE ===
+2026-05-15 14:42:42,044 - INFO - Heures marquï¿½es 1 : 3702 (8.45%)
+2026-05-15 14:42:42,045 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
+2026-05-15 14:42:42,046 - INFO - Tï¿½lï¿½chargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
+2026-05-15 14:42:46,588 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:46,741 - INFO - Annï¿½e 2019 : 8760 lignes parsï¿½es.
+2026-05-15 14:42:46,742 - INFO - Tï¿½lï¿½chargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
+2026-05-15 14:42:49,652 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:49,778 - INFO - Annï¿½e 2020 : 8784 lignes parsï¿½es.
+2026-05-15 14:42:49,779 - INFO - Tï¿½lï¿½chargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
+2026-05-15 14:42:52,406 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:52,529 - INFO - Annï¿½e 2021 : 8760 lignes parsï¿½es.
+2026-05-15 14:42:52,530 - INFO - Tï¿½lï¿½chargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
+2026-05-15 14:42:55,988 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:56,116 - INFO - Annï¿½e 2022 : 8760 lignes parsï¿½es.
+2026-05-15 14:42:56,117 - INFO - Tï¿½lï¿½chargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
+2026-05-15 14:42:58,449 - INFO - Statut HTTP reï¿½u : 200
+2026-05-15 14:42:58,607 - INFO - Annï¿½e 2023 : 8760 lignes parsï¿½es.
+2026-05-15 14:42:58,767 - INFO - Donnï¿½es brutes sauvegardï¿½es dans data\raw\omni_solar_wind.parquet
+2026-05-15 14:42:58,783 - INFO - === MERGE_DATASETS ===
+2026-05-15 14:42:58,827 - INFO - Shape avant merge : (43824, 2) | Aprï¿½s merge : (43824, 5)
+2026-05-15 14:42:58,833 - INFO - NaN par colonne aprï¿½s merge :
 timestamp               0
 is_storm                0
 solar_wind_speed        0
 solar_wind_density    441
 bz_component          265
 dtype: int64
-2026-05-14 23:34:41,064 - INFO - === ADD_ENGINEERED_FEATURES ===
-2026-05-14 23:34:41,171 - INFO - === APPLY_LAG ===
-2026-05-14 23:34:41,172 - INFO - Application d'un lag de 6 heures.
-2026-05-14 23:34:41,180 - INFO - === SAVE_AND_VERIFY ===
-2026-05-14 23:34:41,214 - ERROR - ÉCHEC DU PIPELINE : Erreur : Déséquilibre non conforme (3.09% hors de [5%-25%])
-2026-05-14 23:34:41,216 - ERROR - Traceback (most recent call last):
-  File "C:\Users\PC\PROJET_AURORAS\src\data_collection.py", line 389, in <module>
-    final_dataset = save_and_verify(lagged_df)
-  File "C:\Users\PC\PROJET_AURORAS\src\data_collection.py", line 365, in save_and_verify
-    assert 0.05 <= pct_storm <= 0.25, f"Erreur : Déséquilibre non conforme ({pct_storm*100:.2f}% hors de [5%-25%])"
-           ^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: Erreur : Déséquilibre non conforme (3.09% hors de [5%-25%])
+2026-05-15 14:42:58,834 - INFO - === ADD_ENGINEERED_FEATURES ===
+2026-05-15 14:42:58,984 - INFO - === APPLY_LAG ===
+2026-05-15 14:42:58,984 - INFO - Application d'un lag de 6 heures.
+2026-05-15 14:42:58,990 - INFO - === SAVE_AND_VERIFY ===
+2026-05-15 14:42:59,499 - INFO - Dataset sauvegardï¿½ avec succï¿½s dans data/dataset.csv
+2026-05-15 14:42:59,500 - INFO - PIPELINE TERMINï¿½ AVEC SUCCï¿½S
+2026-05-15 19:39:20,034 - INFO - === GENERATE_TIME_GRID ===
+2026-05-15 19:39:20,041 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
+2026-05-15 19:39:20,041 - INFO - === COLLECT_STORMS_DONKI ===
+2026-05-15 19:39:20,041 - INFO - Chargement des tempêtes depuis le cache : data\raw\storms_donki.json
+2026-05-15 19:39:20,183 - INFO - Total tempêtes collectées : 35
+2026-05-15 19:39:20,184 - INFO - === CREATE_TARGET_VARIABLE ===
+2026-05-15 19:39:20,242 - INFO - Heures marquées 1 : 3702 (8.45%)
+2026-05-15 19:39:20,242 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
+2026-05-15 19:39:20,243 - INFO - Chargement des données OMNI depuis le cache : data\raw\omni_solar_wind.parquet
+2026-05-15 19:39:20,461 - INFO - === MERGE_DATASETS ===
+2026-05-15 19:39:20,491 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 5)
+2026-05-15 19:39:20,495 - INFO - NaN par colonne après merge :
+timestamp               0
+is_storm                0
+solar_wind_speed        0
+solar_wind_density    441
+bz_component          265
+dtype: int64
+2026-05-15 19:39:20,495 - INFO - === ADD_ENGINEERED_FEATURES ===
+2026-05-15 19:39:20,617 - INFO - === APPLY_LAG ===
+2026-05-15 19:39:20,618 - INFO - Application d'un lag de 6 heures.
+2026-05-15 19:39:20,619 - ERROR - ÉCHEC DU PIPELINE : "['dst_index'] not in index"
+2026-05-15 19:39:20,628 - ERROR - Traceback (most recent call last):
+  File "D:\PROJET_AURORAS\src\data_collection.py", line 419, in <module>
+    lagged_df = apply_lag(enriched_df, lag_hours=LAG_HOURS)
+  File "D:\PROJET_AURORAS\src\data_collection.py", line 348, in apply_lag
+    df[cols_to_lag] = df[cols_to_lag].shift(lag_hours)
+                      ~~^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python314\Lib\site-packages\pandas\core\frame.py", line 4384, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python314\Lib\site-packages\pandas\core\indexes\base.py", line 6302, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python314\Lib\site-packages\pandas\core\indexes\base.py", line 6355, in _raise_if_missing
+    raise KeyError(f"{not_found} not in index")
+KeyError: "['dst_index'] not in index"
 
-2026-05-14 23:38:29,917 - INFO - === GENERATE_TIME_GRID ===
-2026-05-14 23:38:29,964 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
-2026-05-14 23:38:29,965 - INFO - === COLLECT_STORMS_DONKI ===
-2026-05-14 23:38:29,967 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 à 2019-12-31)
-2026-05-14 23:38:31,752 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:31,753 - INFO - Trouvé 3 tempêtes en 2019
-2026-05-14 23:38:33,754 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 à 2020-12-31)
-2026-05-14 23:38:35,363 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:35,363 - INFO - Trouvé 1 tempêtes en 2020
-2026-05-14 23:38:37,364 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 à 2021-12-31)
-2026-05-14 23:38:39,078 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:39,079 - INFO - Trouvé 5 tempêtes en 2021
-2026-05-14 23:38:41,079 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 à 2022-12-31)
-2026-05-14 23:38:42,876 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:42,877 - INFO - Trouvé 10 tempêtes en 2022
-2026-05-14 23:38:44,878 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 à 2023-12-31)
-2026-05-14 23:38:47,132 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:47,133 - INFO - Trouvé 16 tempêtes en 2023
-2026-05-14 23:38:49,142 - INFO - Données brutes sauvegardées dans data\raw\storms_donki.json
-2026-05-14 23:38:49,274 - INFO - Total tempêtes collectées : 35
-2026-05-14 23:38:49,277 - INFO - === CREATE_TARGET_VARIABLE ===
-2026-05-14 23:38:49,436 - INFO - Heures marquées 1 : 3702 (8.45%)
-2026-05-14 23:38:49,437 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
-2026-05-14 23:38:49,437 - INFO - Téléchargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
-2026-05-14 23:38:50,932 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:51,014 - INFO - Année 2019 : 8760 lignes parsées.
-2026-05-14 23:38:51,014 - INFO - Téléchargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
-2026-05-14 23:38:55,203 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:55,295 - INFO - Année 2020 : 8784 lignes parsées.
-2026-05-14 23:38:55,296 - INFO - Téléchargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
-2026-05-14 23:38:57,413 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:57,473 - INFO - Année 2021 : 8760 lignes parsées.
-2026-05-14 23:38:57,474 - INFO - Téléchargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
-2026-05-14 23:38:58,958 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:38:59,022 - INFO - Année 2022 : 8760 lignes parsées.
-2026-05-14 23:38:59,023 - INFO - Téléchargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
-2026-05-14 23:39:00,481 - INFO - Statut HTTP reçu : 200
-2026-05-14 23:39:00,556 - INFO - Année 2023 : 8760 lignes parsées.
-2026-05-14 23:39:00,826 - INFO - Données brutes sauvegardées dans data\raw\omni_solar_wind.parquet
-2026-05-14 23:39:00,842 - INFO - === MERGE_DATASETS ===
-2026-05-14 23:39:00,915 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 5)
-2026-05-14 23:39:00,933 - INFO - NaN par colonne après merge :
+2026-05-15 19:39:36,204 - INFO - === GENERATE_TIME_GRID ===
+2026-05-15 19:39:36,210 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
+2026-05-15 19:39:36,210 - INFO - === COLLECT_STORMS_DONKI ===
+2026-05-15 19:39:36,211 - INFO - Chargement des tempêtes depuis le cache : data\raw\storms_donki.json
+2026-05-15 19:39:36,304 - INFO - Total tempêtes collectées : 35
+2026-05-15 19:39:36,304 - INFO - === CREATE_TARGET_VARIABLE ===
+2026-05-15 19:39:36,358 - INFO - Heures marquées 1 : 3702 (8.45%)
+2026-05-15 19:39:36,359 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
+2026-05-15 19:39:36,359 - INFO - Chargement des données OMNI depuis le cache : data\raw\omni_solar_wind.parquet
+2026-05-15 19:39:36,432 - INFO - === MERGE_DATASETS ===
+2026-05-15 19:39:36,465 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 5)
+2026-05-15 19:39:36,468 - INFO - NaN par colonne après merge :
 timestamp               0
 is_storm                0
 solar_wind_speed        0
 solar_wind_density    441
 bz_component          265
 dtype: int64
-2026-05-14 23:39:00,934 - INFO - === ADD_ENGINEERED_FEATURES ===
-2026-05-14 23:39:01,050 - INFO - === APPLY_LAG ===
-2026-05-14 23:39:01,051 - INFO - Application d'un lag de 6 heures.
-2026-05-14 23:39:01,056 - INFO - === SAVE_AND_VERIFY ===
-2026-05-14 23:39:01,527 - INFO - Dataset sauvegardé avec succès dans data/dataset.csv
-2026-05-14 23:39:01,528 - INFO - PIPELINE TERMINÉ AVEC SUCCÈS
-2026-05-15 16:19:01,212 - INFO - === GENERATE_TIME_GRID ===
-2026-05-15 16:19:01,216 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
-2026-05-15 16:19:01,216 - INFO - === COLLECT_STORMS_DONKI ===
-2026-05-15 16:19:01,216 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 à 2019-12-31)
-2026-05-15 16:19:04,036 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:04,037 - INFO - Trouvé 3 tempêtes en 2019
-2026-05-15 16:19:06,038 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 à 2020-12-31)
-2026-05-15 16:19:07,414 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:07,415 - INFO - Trouvé 1 tempêtes en 2020
-2026-05-15 16:19:09,416 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 à 2021-12-31)
-2026-05-15 16:19:10,797 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:10,798 - INFO - Trouvé 5 tempêtes en 2021
-2026-05-15 16:19:12,799 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 à 2022-12-31)
-2026-05-15 16:19:14,448 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:14,449 - INFO - Trouvé 10 tempêtes en 2022
-2026-05-15 16:19:16,450 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 à 2023-12-31)
-2026-05-15 16:19:18,659 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:18,660 - INFO - Trouvé 16 tempêtes en 2023
-2026-05-15 16:19:20,679 - INFO - Données brutes sauvegardées dans data\raw\storms_donki.json
-2026-05-15 16:19:20,729 - INFO - Total tempêtes collectées : 35
-2026-05-15 16:19:20,730 - INFO - === CREATE_TARGET_VARIABLE ===
-2026-05-15 16:19:20,759 - INFO - Heures marquées 1 : 3702 (8.45%)
-2026-05-15 16:19:20,760 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
-2026-05-15 16:19:20,760 - INFO - Téléchargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
-2026-05-15 16:19:23,525 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:23,558 - INFO - Année 2019 : 8760 lignes parsées.
-2026-05-15 16:19:23,559 - INFO - Téléchargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
-2026-05-15 16:19:25,527 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:25,561 - INFO - Année 2020 : 8784 lignes parsées.
-2026-05-15 16:19:25,562 - INFO - Téléchargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
-2026-05-15 16:19:27,240 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:27,282 - INFO - Année 2021 : 8760 lignes parsées.
-2026-05-15 16:19:27,283 - INFO - Téléchargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
-2026-05-15 16:19:29,104 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:29,142 - INFO - Année 2022 : 8760 lignes parsées.
-2026-05-15 16:19:29,142 - INFO - Téléchargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
-2026-05-15 16:19:30,735 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:19:30,768 - INFO - Année 2023 : 8760 lignes parsées.
-2026-05-15 16:19:30,803 - WARNING - Sauvegarde parquet échouée (moteur manquant ?): Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.
-A suitable version of pyarrow or fastparquet is required for parquet support.
-Trying to import the above resulted in these errors:
- - `Import pyarrow` failed. pyarrow is required for parquet support. Use pip or conda to install the pyarrow package.
- - `Import fastparquet` failed. fastparquet is required for parquet support. Use pip or conda to install the fastparquet package.. Utilisation de CSV.
-2026-05-15 16:19:30,902 - INFO - === MERGE_DATASETS ===
-2026-05-15 16:19:30,918 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 6)
-2026-05-15 16:19:30,921 - INFO - NaN par colonne après merge :
-timestamp               0
-is_storm                0
-solar_wind_speed        0
-solar_wind_density    441
-bz_component          265
-dst_index             441
-dtype: int64
-2026-05-15 16:19:30,922 - INFO - === ADD_ENGINEERED_FEATURES ===
-2026-05-15 16:19:30,968 - INFO - === APPLY_LAG ===
-2026-05-15 16:19:30,969 - INFO - Application d'un lag de 6 heures.
-2026-05-15 16:19:30,973 - INFO - === SAVE_AND_VERIFY ===
-2026-05-15 16:19:31,204 - INFO - Dataset sauvegardé avec succès dans data/dataset.csv
-2026-05-15 16:19:31,205 - INFO - PIPELINE TERMINÉ AVEC SUCCÈS
-2026-05-15 16:26:17,067 - INFO - === GENERATE_TIME_GRID ===
-2026-05-15 16:26:17,072 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
-2026-05-15 16:26:17,072 - INFO - === COLLECT_STORMS_DONKI ===
-2026-05-15 16:26:17,072 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 à 2019-12-31)
-2026-05-15 16:26:18,566 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:18,566 - INFO - Trouvé 3 tempêtes en 2019
-2026-05-15 16:26:20,567 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 à 2020-12-31)
-2026-05-15 16:26:21,916 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:21,916 - INFO - Trouvé 1 tempêtes en 2020
-2026-05-15 16:26:23,917 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 à 2021-12-31)
-2026-05-15 16:26:25,449 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:25,450 - INFO - Trouvé 5 tempêtes en 2021
-2026-05-15 16:26:27,450 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 à 2022-12-31)
-2026-05-15 16:26:29,254 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:29,255 - INFO - Trouvé 10 tempêtes en 2022
-2026-05-15 16:26:31,257 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 à 2023-12-31)
-2026-05-15 16:26:33,340 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:33,341 - INFO - Trouvé 16 tempêtes en 2023
-2026-05-15 16:26:35,349 - INFO - Données brutes sauvegardées dans data\raw\storms_donki.json
-2026-05-15 16:26:35,394 - INFO - Total tempêtes collectées : 35
-2026-05-15 16:26:35,395 - INFO - === CREATE_TARGET_VARIABLE ===
-2026-05-15 16:26:35,422 - INFO - Heures marquées 1 : 3702 (8.45%)
-2026-05-15 16:26:35,423 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
-2026-05-15 16:26:35,423 - INFO - Téléchargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
-2026-05-15 16:26:37,508 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:37,544 - INFO - Année 2019 : 8760 lignes parsées.
-2026-05-15 16:26:37,545 - INFO - Téléchargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
-2026-05-15 16:26:39,344 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:39,380 - INFO - Année 2020 : 8784 lignes parsées.
-2026-05-15 16:26:39,381 - INFO - Téléchargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
-2026-05-15 16:26:40,943 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:40,975 - INFO - Année 2021 : 8760 lignes parsées.
-2026-05-15 16:26:40,975 - INFO - Téléchargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
-2026-05-15 16:26:46,743 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:46,790 - INFO - Année 2022 : 8760 lignes parsées.
-2026-05-15 16:26:46,791 - INFO - Téléchargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
-2026-05-15 16:26:48,177 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:26:48,209 - INFO - Année 2023 : 8760 lignes parsées.
-2026-05-15 16:26:48,616 - INFO - Données brutes sauvegardées dans data\raw\omni_solar_wind.parquet
-2026-05-15 16:26:48,620 - INFO - === MERGE_DATASETS ===
-2026-05-15 16:26:48,632 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 6)
-2026-05-15 16:26:48,635 - INFO - NaN par colonne après merge :
-timestamp               0
-is_storm                0
-solar_wind_speed      441
-solar_wind_density      0
-bz_component          265
-dst_index               0
-dtype: int64
-2026-05-15 16:26:48,635 - INFO - === ADD_ENGINEERED_FEATURES ===
-2026-05-15 16:26:48,681 - INFO - === APPLY_LAG ===
-2026-05-15 16:26:48,681 - INFO - Application d'un lag de 6 heures.
-2026-05-15 16:26:48,684 - INFO - === SAVE_AND_VERIFY ===
-2026-05-15 16:26:48,953 - INFO - Dataset sauvegardé avec succès dans data/dataset.csv
-2026-05-15 16:26:48,953 - INFO - PIPELINE TERMINÉ AVEC SUCCÈS
-2026-05-15 16:42:41,619 - INFO - === GENERATE_TIME_GRID ===
-2026-05-15 16:42:41,637 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
-2026-05-15 16:42:41,637 - INFO - === COLLECT_STORMS_DONKI ===
-2026-05-15 16:42:41,637 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 à 2019-12-31)
-2026-05-15 16:42:45,402 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:42:45,403 - INFO - Trouvé 3 tempêtes en 2019
-2026-05-15 16:42:47,403 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 à 2020-12-31)
-2026-05-15 16:42:48,838 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:42:48,839 - INFO - Trouvé 1 tempêtes en 2020
-2026-05-15 16:42:50,840 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 à 2021-12-31)
-2026-05-15 16:42:52,360 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:42:52,361 - INFO - Trouvé 5 tempêtes en 2021
-2026-05-15 16:42:54,362 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 à 2022-12-31)
-2026-05-15 16:42:55,941 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:42:55,942 - INFO - Trouvé 10 tempêtes en 2022
-2026-05-15 16:42:57,943 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 à 2023-12-31)
-2026-05-15 16:42:59,993 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:42:59,994 - INFO - Trouvé 16 tempêtes en 2023
-2026-05-15 16:43:01,998 - INFO - Données brutes sauvegardées dans data\raw\storms_donki.json
-2026-05-15 16:43:02,040 - INFO - Total tempêtes collectées : 35
-2026-05-15 16:43:02,042 - INFO - === CREATE_TARGET_VARIABLE ===
-2026-05-15 16:43:02,072 - INFO - Heures marquées 1 : 3702 (8.45%)
-2026-05-15 16:43:02,072 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
-2026-05-15 16:43:02,072 - INFO - Téléchargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
-2026-05-15 16:43:04,679 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:43:04,725 - INFO - Année 2019 : 8760 lignes parsées.
-2026-05-15 16:43:04,725 - INFO - Téléchargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
-2026-05-15 16:43:06,421 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:43:06,455 - INFO - Année 2020 : 8784 lignes parsées.
-2026-05-15 16:43:06,455 - INFO - Téléchargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
-2026-05-15 16:43:08,480 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:43:08,511 - INFO - Année 2021 : 8760 lignes parsées.
-2026-05-15 16:43:08,512 - INFO - Téléchargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
-2026-05-15 16:43:10,148 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:43:10,181 - INFO - Année 2022 : 8760 lignes parsées.
-2026-05-15 16:43:10,181 - INFO - Téléchargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
-2026-05-15 16:43:12,315 - INFO - Statut HTTP reçu : 200
-2026-05-15 16:43:12,351 - INFO - Année 2023 : 8760 lignes parsées.
-2026-05-15 16:43:12,464 - INFO - Données brutes sauvegardées dans data\raw\omni_solar_wind.parquet
-2026-05-15 16:43:12,469 - INFO - === MERGE_DATASETS ===
-2026-05-15 16:43:12,491 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 6)
-2026-05-15 16:43:12,495 - INFO - NaN par colonne après merge :
+2026-05-15 19:39:36,469 - INFO - === ADD_ENGINEERED_FEATURES ===
+2026-05-15 19:39:36,571 - INFO - === APPLY_LAG ===
+2026-05-15 19:39:36,571 - INFO - Application d'un lag de 6 heures.
+2026-05-15 19:39:36,574 - ERROR - ÉCHEC DU PIPELINE : "['dst_index'] not in index"
+2026-05-15 19:39:36,580 - ERROR - Traceback (most recent call last):
+  File "D:\PROJET_AURORAS\src\data_collection.py", line 419, in <module>
+    lagged_df = apply_lag(enriched_df, lag_hours=LAG_HOURS)
+  File "D:\PROJET_AURORAS\src\data_collection.py", line 348, in apply_lag
+    df[cols_to_lag] = df[cols_to_lag].shift(lag_hours)
+                      ~~^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python314\Lib\site-packages\pandas\core\frame.py", line 4384, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python314\Lib\site-packages\pandas\core\indexes\base.py", line 6302, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python314\Lib\site-packages\pandas\core\indexes\base.py", line 6355, in _raise_if_missing
+    raise KeyError(f"{not_found} not in index")
+KeyError: "['dst_index'] not in index"
+
+2026-05-15 19:43:14,297 - INFO - === GENERATE_TIME_GRID ===
+2026-05-15 19:43:14,303 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
+2026-05-15 19:43:14,304 - INFO - === COLLECT_STORMS_DONKI ===
+2026-05-15 19:43:14,304 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 à 2019-12-31)
+2026-05-15 19:43:17,144 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:17,145 - INFO - Trouvé 3 tempêtes en 2019
+2026-05-15 19:43:19,145 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 à 2020-12-31)
+2026-05-15 19:43:20,831 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:20,832 - INFO - Trouvé 1 tempêtes en 2020
+2026-05-15 19:43:22,832 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 à 2021-12-31)
+2026-05-15 19:43:25,541 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:25,542 - INFO - Trouvé 5 tempêtes en 2021
+2026-05-15 19:43:27,543 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 à 2022-12-31)
+2026-05-15 19:43:30,667 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:30,667 - INFO - Trouvé 10 tempêtes en 2022
+2026-05-15 19:43:32,668 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 à 2023-12-31)
+2026-05-15 19:43:36,040 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:36,040 - INFO - Trouvé 16 tempêtes en 2023
+2026-05-15 19:43:38,046 - INFO - Données brutes sauvegardées dans data\raw\storms_donki.json
+2026-05-15 19:43:38,126 - INFO - Total tempêtes collectées : 35
+2026-05-15 19:43:38,128 - INFO - === CREATE_TARGET_VARIABLE ===
+2026-05-15 19:43:38,211 - INFO - Heures marquées 1 : 3702 (8.45%)
+2026-05-15 19:43:38,212 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
+2026-05-15 19:43:38,212 - INFO - Téléchargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
+2026-05-15 19:43:44,461 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:44,540 - INFO - Année 2019 : 8760 lignes parsées.
+2026-05-15 19:43:44,541 - INFO - Téléchargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
+2026-05-15 19:43:46,622 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:47,033 - INFO - Année 2020 : 8784 lignes parsées.
+2026-05-15 19:43:47,034 - INFO - Téléchargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
+2026-05-15 19:43:48,844 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:48,919 - INFO - Année 2021 : 8760 lignes parsées.
+2026-05-15 19:43:48,919 - INFO - Téléchargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
+2026-05-15 19:43:50,748 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:50,814 - INFO - Année 2022 : 8760 lignes parsées.
+2026-05-15 19:43:50,815 - INFO - Téléchargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
+2026-05-15 19:43:52,845 - INFO - Statut HTTP reçu : 200
+2026-05-15 19:43:53,050 - INFO - Année 2023 : 8760 lignes parsées.
+2026-05-15 19:43:53,183 - INFO - Données brutes sauvegardées dans data\raw\omni_solar_wind.parquet
+2026-05-15 19:43:53,192 - INFO - === MERGE_DATASETS ===
+2026-05-15 19:43:53,227 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 6)
+2026-05-15 19:43:53,231 - INFO - NaN par colonne après merge :
 timestamp               0
 is_storm                0
 solar_wind_speed      441
@@ -277,119 +202,9 @@ solar_wind_density    523
 bz_component          265
 dst_index               0
 dtype: int64
-2026-05-15 16:43:12,495 - INFO - === ADD_ENGINEERED_FEATURES ===
-2026-05-15 16:43:12,549 - INFO - === APPLY_LAG ===
-2026-05-15 16:43:12,549 - INFO - Application d'un lag de 6 heures.
-2026-05-15 16:43:12,552 - INFO - === SAVE_AND_VERIFY ===
-2026-05-15 16:43:12,823 - INFO - Dataset sauvegardé avec succès dans data/dataset.csv
-2026-05-15 16:43:12,823 - INFO - PIPELINE TERMINÉ AVEC SUCCÈS
-2026-05-15 17:02:28,119 - INFO - === GENERATE_TIME_GRID ===
-2026-05-15 17:02:28,122 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
-2026-05-15 17:02:28,122 - INFO - === COLLECT_STORMS_DONKI ===
-2026-05-15 17:02:28,123 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 à 2019-12-31)
-2026-05-15 17:02:29,664 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:29,665 - INFO - Trouvé 3 tempêtes en 2019
-2026-05-15 17:02:31,666 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 à 2020-12-31)
-2026-05-15 17:02:33,021 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:33,021 - INFO - Trouvé 1 tempêtes en 2020
-2026-05-15 17:02:35,022 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 à 2021-12-31)
-2026-05-15 17:02:36,670 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:36,671 - INFO - Trouvé 5 tempêtes en 2021
-2026-05-15 17:02:38,672 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 à 2022-12-31)
-2026-05-15 17:02:40,412 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:40,412 - INFO - Trouvé 10 tempêtes en 2022
-2026-05-15 17:02:42,413 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 à 2023-12-31)
-2026-05-15 17:02:44,449 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:44,449 - INFO - Trouvé 16 tempêtes en 2023
-2026-05-15 17:02:46,457 - INFO - Données brutes sauvegardées dans data\raw\storms_donki.json
-2026-05-15 17:02:46,500 - INFO - Total tempêtes collectées : 35
-2026-05-15 17:02:46,501 - INFO - === CREATE_TARGET_VARIABLE ===
-2026-05-15 17:02:46,522 - INFO - Heures marquées 1 : 3702 (8.45%)
-2026-05-15 17:02:46,522 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
-2026-05-15 17:02:46,523 - INFO - Téléchargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
-2026-05-15 17:02:48,373 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:48,405 - INFO - Année 2019 : 8760 lignes parsées.
-2026-05-15 17:02:48,405 - INFO - Téléchargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
-2026-05-15 17:02:50,069 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:50,104 - INFO - Année 2020 : 8784 lignes parsées.
-2026-05-15 17:02:50,104 - INFO - Téléchargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
-2026-05-15 17:02:51,930 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:51,961 - INFO - Année 2021 : 8760 lignes parsées.
-2026-05-15 17:02:51,962 - INFO - Téléchargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
-2026-05-15 17:02:56,210 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:56,246 - INFO - Année 2022 : 8760 lignes parsées.
-2026-05-15 17:02:56,246 - INFO - Téléchargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
-2026-05-15 17:02:58,018 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:02:58,055 - INFO - Année 2023 : 8760 lignes parsées.
-2026-05-15 17:02:58,114 - INFO - Données brutes sauvegardées dans data\raw\omni_solar_wind.parquet
-2026-05-15 17:02:58,118 - INFO - === MERGE_DATASETS ===
-2026-05-15 17:02:58,129 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 6)
-2026-05-15 17:02:58,131 - INFO - NaN par colonne après merge :
-timestamp               0
-is_storm                0
-solar_wind_speed      441
-solar_wind_density    523
-bz_component          265
-dst_index               0
-dtype: int64
-2026-05-15 17:02:58,132 - INFO - === ADD_ENGINEERED_FEATURES ===
-2026-05-15 17:02:58,176 - INFO - === APPLY_LAG ===
-2026-05-15 17:02:58,177 - INFO - Application d'un lag de 6 heures.
-2026-05-15 17:02:58,179 - INFO - === SAVE_AND_VERIFY ===
-2026-05-15 17:02:58,387 - INFO - Dataset sauvegardé avec succès dans data/dataset.csv
-2026-05-15 17:02:58,387 - INFO - PIPELINE TERMINÉ AVEC SUCCÈS
-2026-05-15 17:05:03,380 - INFO - === GENERATE_TIME_GRID ===
-2026-05-15 17:05:03,384 - INFO - Grille générée : 43824 lignes du 2019-01-01 00:00:00 au 2023-12-31 23:00:00.
-2026-05-15 17:05:03,385 - INFO - === COLLECT_STORMS_DONKI ===
-2026-05-15 17:05:03,385 - INFO - Appel API DONKI pour 2019 : https://api.nasa.gov/DONKI/GST (params: 2019-01-01 à 2019-12-31)
-2026-05-15 17:05:04,973 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:04,973 - INFO - Trouvé 3 tempêtes en 2019
-2026-05-15 17:05:06,975 - INFO - Appel API DONKI pour 2020 : https://api.nasa.gov/DONKI/GST (params: 2020-01-01 à 2020-12-31)
-2026-05-15 17:05:08,120 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:08,121 - INFO - Trouvé 1 tempêtes en 2020
-2026-05-15 17:05:10,122 - INFO - Appel API DONKI pour 2021 : https://api.nasa.gov/DONKI/GST (params: 2021-01-01 à 2021-12-31)
-2026-05-15 17:05:11,500 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:11,501 - INFO - Trouvé 5 tempêtes en 2021
-2026-05-15 17:05:13,502 - INFO - Appel API DONKI pour 2022 : https://api.nasa.gov/DONKI/GST (params: 2022-01-01 à 2022-12-31)
-2026-05-15 17:05:15,244 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:15,244 - INFO - Trouvé 10 tempêtes en 2022
-2026-05-15 17:05:17,246 - INFO - Appel API DONKI pour 2023 : https://api.nasa.gov/DONKI/GST (params: 2023-01-01 à 2023-12-31)
-2026-05-15 17:05:19,553 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:19,554 - INFO - Trouvé 16 tempêtes en 2023
-2026-05-15 17:05:21,560 - INFO - Données brutes sauvegardées dans data\raw\storms_donki.json
-2026-05-15 17:05:21,596 - INFO - Total tempêtes collectées : 35
-2026-05-15 17:05:21,597 - INFO - === CREATE_TARGET_VARIABLE ===
-2026-05-15 17:05:21,618 - INFO - Heures marquées 1 : 3702 (8.45%)
-2026-05-15 17:05:21,619 - INFO - === COLLECT_SOLAR_WIND_OMNI ===
-2026-05-15 17:05:21,620 - INFO - Téléchargement de OMNI 2019 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2019.dat
-2026-05-15 17:05:23,571 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:23,609 - INFO - Année 2019 : 8760 lignes parsées.
-2026-05-15 17:05:23,609 - INFO - Téléchargement de OMNI 2020 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2020.dat
-2026-05-15 17:05:25,424 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:25,457 - INFO - Année 2020 : 8784 lignes parsées.
-2026-05-15 17:05:25,458 - INFO - Téléchargement de OMNI 2021 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2021.dat
-2026-05-15 17:05:27,737 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:27,768 - INFO - Année 2021 : 8760 lignes parsées.
-2026-05-15 17:05:27,768 - INFO - Téléchargement de OMNI 2022 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2022.dat
-2026-05-15 17:05:29,385 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:29,418 - INFO - Année 2022 : 8760 lignes parsées.
-2026-05-15 17:05:29,418 - INFO - Téléchargement de OMNI 2023 : https://spdf.gsfc.nasa.gov/pub/data/omni/low_res_omni/omni2_2023.dat
-2026-05-15 17:05:31,504 - INFO - Statut HTTP reçu : 200
-2026-05-15 17:05:31,538 - INFO - Année 2023 : 8760 lignes parsées.
-2026-05-15 17:05:31,599 - INFO - Données brutes sauvegardées dans data\raw\omni_solar_wind.parquet
-2026-05-15 17:05:31,603 - INFO - === MERGE_DATASETS ===
-2026-05-15 17:05:31,613 - INFO - Shape avant merge : (43824, 2) | Après merge : (43824, 6)
-2026-05-15 17:05:31,616 - INFO - NaN par colonne après merge :
-timestamp               0
-is_storm                0
-solar_wind_speed      441
-solar_wind_density    523
-bz_component          265
-dst_index               0
-dtype: int64
-2026-05-15 17:05:31,616 - INFO - === ADD_ENGINEERED_FEATURES ===
-2026-05-15 17:05:31,660 - INFO - === APPLY_LAG ===
-2026-05-15 17:05:31,661 - INFO - Application d'un lag de 6 heures.
-2026-05-15 17:05:31,668 - INFO - === SAVE_AND_VERIFY ===
-2026-05-15 17:05:31,877 - INFO - Dataset sauvegardé avec succès dans data/dataset.csv
-2026-05-15 17:05:31,877 - INFO - PIPELINE TERMINÉ AVEC SUCCÈS
+2026-05-15 19:43:53,232 - INFO - === ADD_ENGINEERED_FEATURES ===
+2026-05-15 19:43:53,339 - INFO - === APPLY_LAG ===
+2026-05-15 19:43:53,340 - INFO - Application d'un lag de 6 heures.
+2026-05-15 19:43:53,355 - INFO - === SAVE_AND_VERIFY ===
+2026-05-15 19:43:53,845 - INFO - Dataset sauvegardé avec succès dans data/dataset.csv
+2026-05-15 19:43:53,846 - INFO - PIPELINE TERMINÉ AVEC SUCCÈS

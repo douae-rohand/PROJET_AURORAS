@@ -18,14 +18,14 @@ Nous fusionnons deux sources professionnelles pour construire le dataset :
 | API | Rôle | Données Fournies |
 |---|---|---|
 | **NASA DONKI (GST)** | **Target (Y)** | Identifiant de tempête (`gstID`), Dates de début/fin. |
-| **NOAA / NASA OMNI** | **Features (X)** | Vitesse du vent solaire, Densité, Composante Bz. |
+| **NASA OMNI2** | **Features (X)** | Vitesse du vent solaire, Densité, Composante Bz. |
 
 ---
 
 ## 📊 3. Détails du Dataset et des Features
 Le dataset final sera une série temporelle continue (pas de 1 heure) sur une période de 5 ans (2019-2023).
 
-### A. Features Numériques (Brutes de l'API NOAA)
+### A. Features Numériques (Brutes de l'API NASA OMNI2)
 1.  **`solar_wind_speed`** : Vitesse du vent (km/s).
 2.  **`solar_wind_density`** : Concentration de particules.
 3.  **`bz_component`** : Force magnétique (nT).
@@ -36,7 +36,7 @@ Le dataset final sera une série temporelle continue (pas de 1 heure) sur une p�
 6.  **`hour_interval`** : Tranche horaire (0-3h, 3-6h, etc.).
 7.  **`bz_negative`** : `1` si `bz_component < 0`, sinon `0`.
 8.  **`is_solar_maximum`** : `1` pour les années de forte activité (ex: 2023), `0` pour les années calmes.
-9.  **`datetime`** : L'index temporel de la ligne.
+9.  **`timestamp`** : L'index temporel de la ligne.
 
 ### C. La Cible (Y)
 10. **`is_storm`** : `1` si correspondance avec l'API DONKI, `0` sinon.
@@ -47,7 +47,9 @@ Le dataset final sera une série temporelle continue (pas de 1 heure) sur une p�
 1.  Générer une grille de temps vide de **43 800 lignes** (24h * 365j * 5 ans).
 2.  Remplir les colonnes météo avec les données continues de la NOAA (DSCOVR/ACE).
 3.  Télécharger le catalogue JSON de la NASA DONKI.
-4.  **Le Mapping** : Pour chaque ligne du tableau, si l'heure est comprise dans une fenêtre de tempête de la NASA, marquer `is_storm = 1`.
+4.  **Le Mapping (avec Padding)** : Pour garantir le respect du ratio de classe (5-25%), on élargit la fenêtre de tempête :
+    *   `is_storm = 1` si l'heure est comprise entre **T-24h** et **T+72h** d'un événement DONKI.
+    *   Cela permet de capturer les phases de montée et de récupération de la tempête.
 5.  **Le Lag (Décalage)** : Décaler les mesures météo de 6 heures par rapport à la cible pour créer un modèle **prédictif** (prédire le futur avec le passé).
 
 ---

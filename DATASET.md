@@ -22,7 +22,7 @@
 
 ## 2- Exploration des APIs Candidates
 
-Avant de figer notre architecture, nous avons évalué trois sources de données potentielles :
+Avant de figer notre architecture, nous avons évalué 5 sources de données potentielles :
 
 ### API 1 : NASA DONKI
 - **Usage** : Catalogue des tempêtes officielles.

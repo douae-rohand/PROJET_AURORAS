@@ -22,7 +22,7 @@
 
 ## 2- Exploration des APIs Candidates
 
-Avant de figer notre architecture, nous avons évalué trois sources de données potentielles :
+Avant de figer notre architecture, nous avons évalué 5 sources de données potentielles :
 
 ### API 1 : NASA DONKI
 - **Usage** : Catalogue des tempêtes officielles.
@@ -78,7 +78,7 @@ Le dataset a pour but de résoudre un problème critique de **résilience des in
 Le modèle de Machine Learning entraîné sur ces données doit fournir un **délai de réaction de 6 heures**. Ce "lead time" est stratégique : il est suffisamment long pour permettre aux opérateurs de mettre les satellites en mode survie, de délester les réseaux électriques sensibles ou de détourner les vols polaires, tout en restant suffisamment court pour garantir une précision physique élevée basée sur les mesures au point de Lagrange L1.
 
 ### Statistiques Globales
-- **Nombre de lignes** : 43 209 (série temporelle horaire continue).
+- **Nombre de lignes** : 43 207 (série temporelle horaire continue).
 - **Nombre de colonnes** : 15 (14 features + 1 cible).
 
 ### Schéma détaillé des variables

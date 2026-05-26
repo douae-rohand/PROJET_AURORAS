@@ -88,7 +88,7 @@
 ## 7. Feature Engineering
 | Nouvelle Feature | Type | Formule | Justification Métier | Corrélation avec is_storm |
 |---|---|---|---|---|
-| `bz_dst_interaction` | Feature d'interaction | `bz_component × dst_index` | Une tempête se produit quand Bz est négatif ET que le Dst chute simultanément. Le produit capture cette co-occurrence que les features seules ne voient pas. | 0.056 > \|r\| = 0.017 de bz_component seul |
+| `bz_dst_interaction` | Feature d'interaction | `bz_component × dst_index` | Une tempête se produit quand Bz est négatif ET que le Dst chute simultanément. Le produit capture cette co-occurrence que les features seules ne voient pas. | **0.056** > \|r\| = 0.017 de bz_component seul |
 | `dst_rate_change` | Feature temporelle (diff) | `dst_index.diff(periods=3)` | La vitesse de chute du Dst est un indicateur d'alarme : un Dst qui chute rapidement est plus significatif qu'un Dst stable à valeur basse. Capture la dynamique temporelle du système. | **-0.016 (Vitesse)** : Montre si la situation change vite, ce qui aide à prévenir tôt. |
 
 ---
@@ -106,25 +106,24 @@
 
 Ce tableau récapitule l'action effectuée pour chaque variable du dataset initial, conformément aux exigences du cahier des charges.
 
-| Variable | Action effectuée | Pourquoi ? (Mots simples) |
-|---|---|---|---|
-| `timestamp` | **Suppression** | Pas utile pour les calculs. On utilise déjà le mois et l'heure à la place. |
-| `solar_wind_speed` | **Changement d'échelle** | On garde les valeurs fortes car ce sont elles qui montrent les grosses tempêtes. |
-| `solar_wind_density` | **Changement d'échelle** | On garde les pics de densité car c'est là que le soleil "souffle" le plus fort. |
-| `bz_component` | **Changement d'échelle** | On garde les valeurs extrêmes car elles montrent quand le champ magnétique change. |
-| `solar_wind_pressure` | **Changement d'échelle** | On garde les chocs forts sur la Terre. |
-| `bz_min_3h` | **Changement d'échelle** | On garde les moments où le champ magnétique est le plus bas. |
-| `dst_index` | **Changement d'échelle** | C'est la mesure principale pour dire s'il y a une tempête ou non. |
-| `month` | **Suppression** | Déjà remplacé par des versions mathématiques plus faciles à lire pour l'ordinateur. |
-| `sin_month` | **Conservation** | Aide l'ordinateur à comprendre les saisons (été, hiver, etc.). |
-| `cos_month` | **Conservation** | Aide l'ordinateur à comprendre les saisons. |
-| `season` | **Transformation** | Transformé en 4 colonnes (printemps, été, automne, hiver) pour plus de clarté. |
-| `hour_interval` | **Transformation** | Découpé en tranches d'heures pour voir si le moment de la journée compte. |
-| `bz_negative` | **Conservation** | Dit simplement si le champ magnétique est du bon côté pour une tempête (Oui/Non). |
-| `is_solar_maximum` | **Conservation** | Dit si le Soleil est dans sa période de grande activité (tous les 11 ans). |
-| `bz_dst_interaction` | **Nouveau calcul** | Mélange de deux mesures pour voir quand les conditions de tempête sont réunies. |
-| `dst_rate_change` | **Nouveau calcul** | Regarde si la tempête arrive vite ou doucement. |
-| `is_storm` | **Conservation** | C'est ce que l'on veut deviner (Tempête : Oui ou Non). |
-
+| Variable | Action effectuée | Pourquoi ? |
+|---|---|---|
+| `timestamp` | **Suppression** | Index temporel brut inutilisable par un modèle ML. L'information temporelle est déjà capturée par `sin_month`, `cos_month` et `season`. |
+| `solar_wind_speed` | **RobustScaler** | 51.2% des outliers sont des tempêtes (6× le taux global) - valeurs extrêmes conservées car porteuses du signal le plus fort. |
+| `solar_wind_density` | **RobustScaler** | Outliers valides conservés (pics = éjections de masse coronale). RobustScaler choisi pour ne pas écraser ces valeurs extrêmes. |
+| `bz_component` | **RobustScaler** | 25.5% des outliers sont des tempêtes. Les valeurs très négatives représentent la reconnexion magnétique - signal physique critique. |
+| `solar_wind_pressure` | **RobustScaler** | 25.5% des outliers sont des tempêtes. Les pics de pression correspondent aux chocs magnétosphériques lors des tempêtes majeures. |
+| `bz_min_3h` | **RobustScaler** | 26.7% des outliers sont des tempêtes. Minimum glissant de `bz_component` sur 3h - même justification physique. |
+| `dst_index` | **RobustScaler** | 49.5% des outliers sont des tempêtes (6× le taux global). Dst < -50 nT = définition officielle d'une tempête géomagnétique. |
+| `month` | **Suppression** | Redondant avec `sin_month` et `cos_month` qui encodent le même mois de manière cyclique et continue - suppression pour redondance, pas pour manque de signal. |
+| `sin_month` | **Conservation** | Encodage cyclique du mois - permet au modèle de comprendre que décembre et janvier sont consécutifs. |
+| `cos_month` | **Conservation** | Complément de `sin_month` pour un encodage cyclique complet du mois. |
+| `season` | **One-Hot Encoding** | Variable nominale transformée en 4 colonnes binaires. L'EDA confirme son pouvoir discriminant : automne 12.57% vs été 4.22% de tempêtes. |
+| `hour_interval` | **One-Hot Encoding** | Variable nominale transformée en 8 colonnes binaires. Conservée malgré un signal faible dans l'EDA pour laisser le modèle évaluer son utilité. |
+| `bz_negative` | **Conservation** | Déjà binaire {0,1}. Indique si la reconnexion magnétique est active — information directement exploitable. |
+| `is_solar_maximum` | **Conservation** | Déjà binaire {0,1}. Capture le cycle solaire de 11 ans - contexte d'activité solaire globale. |
+| `bz_dst_interaction` | **Nouvelle feature** | Produit `bz_component × dst_index` - capture la co-occurrence des deux signaux forts qu'aucune feature seule ne voit. |
+| `dst_rate_change` | **Nouvelle feature** | Variation de `dst_index` sur 3h — un Dst qui chute rapidement est un indicateur d'alarme plus fort qu'un Dst stable à valeur basse. |
+| `is_storm` | **Conservation** | Variable cible - 1 si tempête à T+6h, 0 sinon. Ratio 8.5% / 91.5%. |
 ---
 

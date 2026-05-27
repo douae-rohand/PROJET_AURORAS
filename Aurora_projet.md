@@ -4,7 +4,7 @@ Ce document récapitule la nouvelle stratégie de collecte et de modélisation p
 
 ---
 
-## 🎯 1. Le Sujet : "Naturalité" de la Cible
+## 1. Le Sujet : "Naturalité" de la Cible
 **Problématique :** Éviter de créer une variable cible artificielle (ex: Kp >= 5 décidé par nous).
 **Solution :** Prédire si la NASA enregistre officiellement une **Tempête Géomagnétique (GST)** à une heure donnée.
 *   **Variable Cible (`is_storm`)** : `1` si l'événement est listé dans l'API NASA DONKI, `0` sinon.
@@ -12,7 +12,7 @@ Ce document récapitule la nouvelle stratégie de collecte et de modélisation p
 
 ---
 
-## 📡 2. Architecture des APIs
+## 2. Architecture des APIs
 Nous fusionnons deux sources professionnelles pour construire le dataset :
 
 | API | Rôle | Données Fournies |
@@ -22,7 +22,7 @@ Nous fusionnons deux sources professionnelles pour construire le dataset :
 
 ---
 
-## 📊 3. Structure du Dataset Final (10 Features)
+## 3. Structure du Dataset Final (10 Features)
 Le dataset est une série temporelle horaire (2019-2023) contenant les variables suivantes :
 
 | Feature | Source | Description | Impact ML |
@@ -40,7 +40,7 @@ Le dataset est une série temporelle horaire (2019-2023) contenant les variables
 
 ---
 
-## ⚙️ 4. Procédure de Construction et Nettoyage
+## 4. Procédure de Construction et Nettoyage
 1.  **Time Grid** : Génération d'une grille continue de ~43 800 lignes.
 2.  **Collection OMNI2** : Téléchargement et parsing précis des colonnes physiques de la NASA.
 3.  **Feature Engineering** : Calcul de la pression dynamique et des moyennes glissantes (Bz).
@@ -50,7 +50,7 @@ Le dataset est une série temporelle horaire (2019-2023) contenant les variables
 
 ---
 
-## ✅ 5. Vérification de Conformité (Cadrage Professeur)
+## 5. Vérification de Conformité (Cadrage Professeur)
 
 | Contrainte du Cadrage | Respectée ? | Justification |
 |---|---|---|
@@ -63,5 +63,5 @@ Le dataset est une série temporelle horaire (2019-2023) contenant les variables
 
 ---
 
-## 🏁 Conclusion
+## Conclusion
 Cette approche transforme un simple exercice de filtrage (Kp > 5) en un véritable projet d'**Ingénierie de Données Spatiales**. Elle respecte 100% des contraintes du cadrage `PROJET_AURORES.md` tout en étant scientifiquement et techniquement plus robuste pour une présentation devant un jury.

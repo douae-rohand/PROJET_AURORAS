@@ -432,45 +432,103 @@ st.markdown("""
     }
 
     /* Batch upload */
-    .upload-intro {
-        color: #718096;
-        font-size: 0.92rem;
-        margin-bottom: 1.25rem;
-        line-height: 1.7;
+    /* ==========================================
+       NEW BATCH HUB DESIGN
+       ========================================== */
+    .batch-hub-container {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 24px;
+        padding: 0;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
     }
 
-    .upload-intro code {
-        color: #a0aec0;
-        font-size: 0.82rem;
+    .batch-hub-header {
+        background: #f8fafc;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
 
-    .upload-zone-header {
-        text-align: center;
-        margin-bottom: 1rem;
-        padding: 1.5rem 1rem 0.5rem 1rem;
-        border: 1px dashed rgba(79, 209, 197, 0.4);
-        border-radius: 20px 20px 0 0;
-        background: linear-gradient(135deg, rgba(159, 122, 234, 0.08), rgba(79, 209, 197, 0.06));
-    }
-
-    .upload-zone-header .icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .upload-zone-header .title {
-        color: #1a202c;
+    .batch-hub-header .icon { font-size: 1.5rem; }
+    .batch-hub-header .title {
         font-family: 'Playfair Display', serif;
-        font-size: 1.35rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a202c;
     }
 
-    div[data-testid="column"]:has(.upload-panel-marker) [data-testid="stFileUploader"] {
-        margin-top: 0 !important;
+    .batch-hub-content {
+        padding: 2rem;
     }
 
-    div[data-testid="column"]:has(.upload-panel-marker) [data-testid="stFileUploader"] section {
-        background: rgba(255, 255, 255, 0.4) !important;
-        border: 1px dashed rgba(0, 0, 0, 0.15) !important;
-        border-top: none !important;
-        border-radius: 0 0 20px 20px !important;
-        padding: 1.25rem !important;
-        margin-bottom: 0.5rem !important;
+    .batch-guide-row {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .batch-guide-specs {
+        flex: 1.2;
+        background: #ffffff;
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .batch-upload-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .glossary-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .glossary-item .label {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        min-width: 130px;
+        text-align: center;
+    }
+
+    .glossary-item .desc { color: #64748b; }
+
+    div[data-testid="column"]:has(.batch-hub-marker) [data-testid="stFileUploader"] section {
+        background: #ffffff !important;
+        border: 2px dashed #e2e8f0 !important;
+        border-radius: 16px !important;
+        padding: 1rem 1.5rem !important;
+        transition: all 0.3s ease;
+        min-height: 90px !important;
+    }
+
+    div[data-testid="column"]:has(.batch-hub-marker) [data-testid="stFileUploader"] section:hover {
+        border-color: #4fd1c5 !important;
+        background: #f0fff4 !important;
+    }
+
+    .results-hub-header {
+        margin-top: 3rem;
+        padding-left: 1rem;
+        border-left: 4px solid #4fd1c5;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 1.5rem;
     }
 
     .upload-hint {
@@ -957,83 +1015,108 @@ elif st.session_state.page == "Batch":
 
     batch_col, = st.columns(1)
     with batch_col:
-        card_marker()
-        st.markdown('<div class="card-title">Import & Traitement</div>', unsafe_allow_html=True)
-
+        # Dictionnaire des explications détaillées
+        COL_INFO = [
+            ("solar_wind_speed", "Vitesse du vent solaire (km/s)"),
+            ("solar_wind_density", "Densité de protons (N/cm³)"),
+            ("bz_component", "Champ magnétique Z (nT)"),
+            ("dst_index", "Indice de perturbation (nT)"),
+            ("month", "Mois calendaire (1-12)"),
+            ("season", "Saison (1:Hiv, 2:Pri, 3:Été, 4:Aut)"),
+            ("hour_interval", "Tranche de 3h (Index 0-7)"),
+            ("is_solar_maximum", "Pic d'activité cycle (0/1)")
+        ]
+        
+        glossary_html = "".join([
+            f'<div class="glossary-item"><span class="label">{c}</span><span class="desc">{d}</span></div>' 
+            for c, d in COL_INFO
+        ])
+        
         st.markdown(
             f"""
-            <div class="upload-intro">
-                Colonnes minimales (POST /predict/batch) :<br>
-                <code>{", ".join(REQUIRED_BATCH_COLUMNS)}</code><br>
-                <span style="font-size:0.82rem;">month, sin_month, cos_month ajoutés automatiquement si absents.</span>
-            </div>
-            <div class="upload-zone-header">
-                <div class="icon">☁️</div>
-                <div class="title">Zone de dépôt CSV</div>
-            </div>
+            <div class="batch-hub-container">
+                <div class="batch-hub-header">
+                    <span class="icon">📁</span>
+                    <span class="title">CENTRE D'OPÉRATIONS COLLECTIVES</span>
+                </div>
+                <div class="batch-hub-content">
+                    <div class="batch-guide-row">
+                        <div class="batch-guide-specs">
+                            <h5 style="margin:0 0 1rem 0; color:#1e293b; font-size:0.85rem; font-weight:800; letter-spacing:0.05em;">GLOSSAIRE DES VARIABLES</h5>
+                            {glossary_html}
+                        </div>
+                        <div class="batch-upload-area">
+                            <h5 style="margin:0 0 0.8rem 0; color:#1e293b; font-size:0.85rem; font-weight:800; letter-spacing:0.05em;">MODE D'EMPLOI</h5>
+                            <div style="font-size:0.82rem; color:#64748b; line-height:1.5; margin-bottom:1.5rem;">
+                                1. <b>Importation :</b> Déposez un fichier .csv contenant les colonnes brutes listées à gauche.<br>
+                                2. <b>Analyse :</b> Le modéle génère les variables dérivées et lance l'inférence complexe.<br>
+                                3. <b>Retour :</b> Vous obtenez un tableau de verdicts et un bouton d'export CSV complet.
+                            </div>
             """,
             unsafe_allow_html=True,
         )
-
-        st.markdown('<span class="upload-panel-marker aurora-marker"></span>', unsafe_allow_html=True)
+        
         uploaded_file = st.file_uploader(
-            "Choisir un fichier CSV", type="csv", label_visibility="collapsed", key="batch_uploader",
+            "Choisir un fichier CSV", type="csv", label_visibility="collapsed", key="batch_uploader"
         )
-        st.markdown('<div class="upload-hint">Taille max. 10 Mo · Encodage UTF-8 recommandé</div>', unsafe_allow_html=True)
+        
+        st.markdown(
+            """
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
 
         if uploaded_file is not None:
             df_batch = pd.read_csv(uploaded_file)
             missing_cols = [c for c in REQUIRED_BATCH_COLUMNS if c not in df_batch.columns]
 
             if missing_cols:
-                st.error(
-                    f"Colonnes manquantes : {', '.join(missing_cols)}. "
-                    "Veuillez fournir un CSV conforme au schéma OMNI2."
-                )
+                st.error(f"Colonnes manquantes : {', '.join(missing_cols)}")
             else:
-                st.markdown('<div class="card-title-sm">Aperçu — 5 premières lignes</div>', unsafe_allow_html=True)
+                st.markdown('<div class="card-title-sm">Aperçu des données entrantes</div>', unsafe_allow_html=True)
                 st.dataframe(df_batch.head(5), use_container_width=True, hide_index=True)
 
-                if st.button("Lancer l'analyse du lot", key="batch_run"):
-                    progress = st.progress(0.0, text="Initialisation du pipeline d'inférence…")
+                if st.button("Lancer l'Analyse Prédictive", type="primary", use_container_width=True):
                     try:
-                        with st.spinner("Traitement via l'API Aurora…"):
-                            df_results = api_predict_batch(df_batch, progress_bar=progress)
-                            progress.progress(1.0, text="Analyse terminée")
-
+                        with st.spinner("Analyse du lot en cours via l'API Aurora..."):
+                            df_results = api_predict_batch(df_batch)
+                        
                         threshold = float(df_results["threshold"].iloc[0]) if "threshold" in df_results.columns else 0.28
-                        df_results["probabilité_%"] = df_results["probability"].map(lambda p: f"{float(p):.1%}")
-                        df_results["résultat"] = df_results["prediction"].map(risk_label)
-                        df_results["confiance"] = df_results["probability"].map(
-                            lambda p: confidence_label(float(p), threshold)
-                        )
+                        df_results["résultat"] = df_results["prediction"].apply(risk_label)
+                        df_results["probabilité_%"] = df_results["probability"]
                         st.session_state.batch_results = df_results
                         st.session_state.batch_done = True
                     except Exception as exc:
-                        st.error(f"Échec de l'appel API ({API_BASE_URL}/predict/batch) : {exc}")
+                        st.error(f"Erreur API : {exc}")
 
                 if st.session_state.get("batch_done"):
-                    st.markdown('<div class="card-title-sm">Résultats enrichis</div>', unsafe_allow_html=True)
-                    display_df = st.session_state.batch_results.copy()
+                    st.markdown('<div class="results-hub-header">Rapport d\'Investigation Spatiale</div>', unsafe_allow_html=True)
+                    
                     st.dataframe(
-                        display_df,
+                        st.session_state.batch_results,
                         use_container_width=True,
                         hide_index=True,
+                        column_order=("résultat", "probabilité_%", "solar_wind_speed", "solar_wind_density", "bz_component", "dst_index"),
                         column_config={
-                            "probabilité_%": st.column_config.TextColumn("Probabilité", width="small"),
-                            "résultat": st.column_config.TextColumn("Verdict", width="medium"),
-                            "confiance": st.column_config.TextColumn("Confiance", width="small"),
-                            "bz_component": st.column_config.NumberColumn("Bz", format="%.1f nT"),
-                            "dst_index": st.column_config.NumberColumn("Dst", format="%.0f nT"),
+                            "résultat": st.column_config.TextColumn("Verdict IA"),
+                            "probabilité_%": st.column_config.ProgressColumn("Probalité", format="%.2f", min_value=0, max_value=1),
+                            "solar_wind_speed": st.column_config.NumberColumn("Vitesse", format="%.0f km/s"),
                         },
                     )
+                    
+                    st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
+                    
                     csv_export = st.session_state.batch_results.to_csv(index=False).encode("utf-8")
                     st.download_button(
-                        label="Télécharger les résultats",
+                        label="Exporter le rapport complet (CSV)",
                         data=csv_export,
-                        file_name=f"aurora_batch_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                        file_name=f"aurora_batch_report.csv",
                         mime="text/csv",
-                        key="download_batch",
+                        use_container_width=True
                     )
 
 # =================================================================

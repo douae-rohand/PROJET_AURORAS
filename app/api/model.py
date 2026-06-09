@@ -28,11 +28,10 @@ try:
             "recall_test_default"   : data["recall_test_default_threshold"],
             "pr_auc_test"           : data["pr_auc_test"]
         },
+        # Colonnes d'entrée attendues par l'API (les features dérivées sont calculées en interne)
         "features": [
             "solar_wind_speed", "solar_wind_density", "bz_component",
-            "solar_wind_pressure", "bz_min_3h", "dst_index",
-            "month", "sin_month", "cos_month", "season",
-            "hour_interval", "bz_negative", "is_solar_maximum"
+            "dst_index", "month", "season", "hour_interval", "is_solar_maximum"
         ]
     }
     logger.info(f"Modèle '{MODEL_METADATA['model_type']}' chargé (seuil={THRESHOLD})")

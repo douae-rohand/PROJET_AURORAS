@@ -1,7 +1,8 @@
+import io
+import os
 import streamlit as st
 import pandas as pd
-import numpy as np
-import time
+import requests
 import base64
 import math
 from datetime import datetime
@@ -26,19 +27,21 @@ st.markdown("""
 
     /* Reset global */
     html, body, [data-testid="stAppViewContainer"] {
-        background: radial-gradient(circle at top right, #1a0b2e, #050505) !important;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
         font-family: 'Inter', sans-serif !important;
-        color: #e2e8f0 !important;
+        color: #2d3748 !important;
     }
 
-    .main .block-container {
-        padding-top: 0.75rem !important;
+    .main .block-container,
+    [data-testid="stAppViewBlockContainer"] {
+        padding-top: 0.35rem !important;
         padding-left: 6% !important;
         padding-right: 6% !important;
         max-width: 100% !important;
     }
 
     [data-testid="stHeader"] { background: rgba(0,0,0,0); height: 0; }
+    [data-testid="stDecoration"] { display: none; }
 
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -55,6 +58,7 @@ st.markdown("""
     /* Marqueurs invisibles pour ancrer le style sur les colonnes */
     .aurora-marker,
     .aurora-page-marker,
+    .header-row-marker,
     .predict-grid-marker,
     .about-info-grid-marker,
     .about-metrics-grid-marker {
@@ -63,19 +67,19 @@ st.markdown("""
 
     /* Panneaux glassmorphism — appliqués sur la colonne Streamlit */
     div[data-testid="column"]:has(.aurora-card-marker) > div[data-testid="stVerticalBlock"] {
-        background: rgba(15, 15, 35, 0.6);
+        background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 24px;
         padding: 2.5rem 2rem;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
         height: 100%;
     }
 
     div[data-testid="column"]:has(.info-card-marker) > div[data-testid="stVerticalBlock"] {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.4);
+        border: 1px solid rgba(0, 0, 0, 0.05);
         border-radius: 20px;
         padding: 1.75rem;
         height: 100%;
@@ -94,13 +98,38 @@ st.markdown("""
         align-self: stretch !important;
     }
 
-    /* Header — une seule ligne */
+    /* Header — compact, collé en haut */
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) {
+        margin-top: -0.75rem !important;
+        align-items: center !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) > div[data-testid="column"] {
+        padding-top: 0 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) [data-testid="stVerticalBlock"] {
+        gap: 0.2rem !important;
+        padding-top: 0 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) [data-testid="stVerticalBlock"] > div {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) .stButton > button {
+        margin-top: 0 !important;
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+    }
+
     .header-logo-container {
         display: flex;
         align-items: center;
         padding: 0;
         margin-left: -35px;
-        margin-top: -6px;
+        margin-top: -22px;
     }
 
     .logo-img {
@@ -113,14 +142,16 @@ st.markdown("""
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        padding-top: 8px;
+        padding-top: 0;
+        margin-top: -8px;
+        height: 100%;
     }
 
     .status-badge {
         background: rgba(79, 209, 197, 0.1);
         border-radius: 20px;
         padding: 4px 12px;
-        border: 1px solid rgba(79, 209, 197, 0.3);
+        border: 1px solid rgba(79, 209, 197, 0.4);
         white-space: nowrap;
     }
 
@@ -130,15 +161,15 @@ st.markdown("""
         border: none !important;
         color: white !important;
         border-radius: 12px !important;
-        padding: 6px 14px !important;
-        font-size: 0.72rem !important;
+        padding: 6px 16px !important;
+        font-size: 0.75rem !important;
         font-weight: 700 !important;
         letter-spacing: 0.05em !important;
         box-shadow: 0 0 15px rgba(128, 90, 213, 0.3) !important;
         transition: all 0.3s ease !important;
         white-space: nowrap !important;
         width: 100% !important;
-        min-width: 0 !important;
+        min-width: 110px !important;
     }
 
     .stButton > button[key^="nav"]:hover {
@@ -146,10 +177,29 @@ st.markdown("""
         box-shadow: 0 0 20px rgba(79, 209, 197, 0.5) !important;
     }
 
+    .nav-slot {
+        min-height: 18px;
+        text-align: center;
+        margin-top: 6px;
+    }
+
+    .nav-active-label {
+        font-size: 0.6rem;
+        color: #319795;
+        letter-spacing: 0.15em;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .nav-slot-spacer {
+        display: block;
+        height: 18px;
+    }
+
     .header-divider {
         border: none;
-        border-top: 1px solid rgba(255,255,255,0.05);
-        margin: 0.25rem 0 2rem 0;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        margin: 0.25rem 0 2.5rem 0;
     }
 
     /* Sections */
@@ -158,7 +208,7 @@ st.markdown("""
     }
 
     .card-title {
-        color: white;
+        color: #1a202c;
         font-family: 'Playfair Display', serif;
         font-size: 1.5rem;
         margin-bottom: 1.75rem;
@@ -166,7 +216,7 @@ st.markdown("""
     }
 
     .card-title-sm {
-        color: white;
+        color: #1a202c;
         font-family: 'Playfair Display', serif;
         font-size: 1.2rem;
         margin: 2rem 0 1rem 0;
@@ -183,7 +233,7 @@ st.markdown("""
 
     .main-title {
         font-family: 'Playfair Display', serif;
-        color: white;
+        color: #1a202c;
         font-size: 3.5rem;
         font-weight: 700;
         margin-bottom: 1rem;
@@ -197,7 +247,7 @@ st.markdown("""
     }
 
     .lead-text {
-        color: #a0aec0;
+        color: #4a5568;
         font-size: 1.1rem;
         max-width: 720px;
         line-height: 1.7;
@@ -214,10 +264,10 @@ st.markdown("""
     }
 
     .info-mini-card p {
-        color: #cbd5e0;
+        color: #4a5568;
         font-size: 0.98rem;
         line-height: 1.75;
-        font-weight: 300;
+        font-weight: 400;
         margin: 0;
     }
 
@@ -230,7 +280,7 @@ st.markdown("""
     }
 
     .input-label-row span:first-child {
-        color: #a0aec0;
+        color: #4a5568;
         font-weight: 600;
         font-size: 0.82rem;
         text-transform: uppercase;
@@ -254,9 +304,9 @@ st.markdown("""
 
     .stNumberInput input,
     .stSelectbox [data-baseweb="select"] > div {
-        background: rgba(0, 0, 0, 0.3) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        color: white !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        color: #1a202c !important;
         border-radius: 12px !important;
     }
 
@@ -271,7 +321,7 @@ st.markdown("""
     }
 
     label p {
-        color: #a0aec0 !important;
+        color: #4a5568 !important;
         font-weight: 600 !important;
         font-size: 0.85rem !important;
         text-transform: uppercase;
@@ -352,14 +402,14 @@ st.markdown("""
     }
 
     .result-status {
-        color: white;
+        color: #1a202c;
         font-family: 'Playfair Display', serif;
         font-size: 2.2rem;
         margin-bottom: 0.75rem;
     }
 
     .result-meta {
-        color: #a0aec0;
+        color: #4a5568;
         line-height: 1.7;
         max-width: 380px;
         margin: 0 auto;
@@ -405,7 +455,7 @@ st.markdown("""
 
     .upload-zone-header .icon { font-size: 2rem; margin-bottom: 0.5rem; }
     .upload-zone-header .title {
-        color: white;
+        color: #1a202c;
         font-family: 'Playfair Display', serif;
         font-size: 1.35rem;
     }
@@ -415,8 +465,8 @@ st.markdown("""
     }
 
     div[data-testid="column"]:has(.upload-panel-marker) [data-testid="stFileUploader"] section {
-        background: rgba(0, 0, 0, 0.2) !important;
-        border: 1px dashed rgba(79, 209, 197, 0.35) !important;
+        background: rgba(255, 255, 255, 0.4) !important;
+        border: 1px dashed rgba(0, 0, 0, 0.15) !important;
         border-top: none !important;
         border-radius: 0 0 20px 20px !important;
         padding: 1.25rem !important;
@@ -436,8 +486,8 @@ st.markdown("""
 
     /* Métriques */
     .metric-grid-item {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(0, 0, 0, 0.05);
         border-radius: 20px;
         padding: 1.75rem 1.25rem;
         text-align: center;
@@ -448,6 +498,7 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
     }
 
     .metric-grid-item:hover { border-color: #4fd1c5; }
@@ -461,13 +512,13 @@ st.markdown("""
     }
     .metric-val {
         font-size: 2.2rem;
-        color: white;
+        color: #1a202c;
         font-weight: 700;
         font-family: 'Playfair Display', serif;
     }
 
     .model-desc {
-        color: #cbd5e0;
+        color: #4a5568;
         font-size: 1rem;
         line-height: 1.8;
         margin-bottom: 1.5rem;
@@ -475,7 +526,7 @@ st.markdown("""
 
     .model-footer-card {
         padding-top: 1.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .model-footer-row {
@@ -486,11 +537,11 @@ st.markdown("""
     }
 
     .model-footer-label { color: #718096; }
-    .model-footer-value { color: white; font-weight: 600; }
-    .model-footer-status { color: #4fd1c5; font-weight: 600; }
+    .model-footer-value { color: #1a202c; font-weight: 600; }
+    .model-footer-status { color: #319795; font-weight: 600; }
 
     [data-testid="stDataFrame"] {
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
         border-radius: 16px;
         overflow: hidden;
     }
@@ -512,23 +563,24 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =================================================================
-# CONSTANTES
+# CONSTANTES & API
 # =================================================================
-PREDICTION_THRESHOLD = 0.28
+API_BASE_URL = os.getenv("AURORA_API_URL", "http://localhost:8000").rstrip("/")
+API_TIMEOUT = int(os.getenv("AURORA_API_TIMEOUT", "60"))
 
+# Colonnes minimales attendues côté CSV (maintenant uniquement les données brutes)
 REQUIRED_BATCH_COLUMNS = [
     "solar_wind_speed",
     "solar_wind_density",
     "bz_component",
-    "solar_wind_pressure",
-    "bz_min_3h",
     "dst_index",
-    "dst_rate_change",
-    "bz_negative",
-    "is_solar_maximum",
+    "month",
     "season",
     "hour_interval",
+    "is_solar_maximum",
 ]
+
+CONFIDENCE_FR = {"high": "Élevée", "medium": "Moyenne", "low": "Faible"}
 
 NAV_ITEMS = {
     "Predict": "Inférence",
@@ -577,11 +629,15 @@ def render_help(help_text: str) -> None:
     st.markdown(f'<div class="sub-help">{help_text}</div>', unsafe_allow_html=True)
 
 
-def nav_button_label(page_key: str) -> str:
-    name = NAV_ITEMS[page_key].upper()
+def risk_label(prediction_value: int) -> str:
+    return "RISQUE ÉLEVÉ" if prediction_value == 1 else "RISQUE FAIBLE"
+
+
+def render_nav_slot(page_key: str) -> None:
     if st.session_state.page == page_key:
-        return f"● {name}"
-    return name
+        st.markdown('<div class="nav-slot"><span class="nav-active-label">● actif</span></div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="nav-slot"><span class="nav-slot-spacer">&nbsp;</span></div>', unsafe_allow_html=True)
 
 
 # =================================================================
@@ -597,49 +653,94 @@ def month_to_cyclical(month: int) -> tuple[float, float]:
     return math.sin(angle), math.cos(angle)
 
 
-def enrich_payload(raw: dict) -> dict:
-    payload = raw.copy()
-    payload["bz_dst_interaction"] = payload["bz_component"] * payload["dst_index"]
-    sin_month, cos_month = month_to_cyclical(int(payload.get("month", datetime.now().month)))
-    payload["sin_month"] = sin_month
-    payload["cos_month"] = cos_month
-    return payload
+def build_storm_features_payload(raw: dict) -> dict:
+    """Construit le corps JSON simplifié attendu par POST /predict."""
+    return {
+        "solar_wind_speed": float(raw["solar_wind_speed"]),
+        "solar_wind_density": float(raw["solar_wind_density"]),
+        "bz_component": float(raw["bz_component"]),
+        "dst_index": float(raw["dst_index"]),
+        "month": int(raw.get("month", datetime.now().month)),
+        "season": raw["season"],
+        "hour_interval": raw["hour_interval"],
+        "is_solar_maximum": int(raw["is_solar_maximum"]),
+    }
 
 
-def compute_storm_score(row: dict | pd.Series) -> float:
-    bz = float(row["bz_component"])
-    dst = float(row["dst_index"])
-    sws = float(row.get("solar_wind_speed", 400))
-    dst_rate = float(row.get("dst_rate_change", 0))
-    bz_min = float(row.get("bz_min_3h", bz))
-
-    score = 0.05
-    if bz < -5:
-        score += 0.30
-    if bz < -10:
-        score += 0.10
-    if dst < -30:
-        score += 0.15
-    if dst < -50:
-        score += 0.25
-    if dst < -100:
-        score += 0.10
-    if sws > 500:
-        score += 0.08
-    if sws > 700:
-        score += 0.05
-    if bz_min < -10:
-        score += 0.07
-    if dst_rate < -20:
-        score += 0.08
-    if bz * dst > 100:
-        score += 0.06
-    if int(row.get("bz_negative", 0)) == 1 and dst < -20:
-        score += 0.05
-    return score
+def prepare_batch_for_api(df: pd.DataFrame) -> pd.DataFrame:
+    """Aligne le CSV sur les 13 features attendues par POST /predict/batch."""
+    df = df.copy()
+    if "month" not in df.columns:
+        df["month"] = datetime.now().month
+    if "sin_month" not in df.columns:
+        df["sin_month"] = df["month"].apply(lambda m: month_to_cyclical(int(m))[0])
+    if "cos_month" not in df.columns:
+        df["cos_month"] = df["month"].apply(lambda m: month_to_cyclical(int(m))[1])
+    return df
 
 
-def confidence_label(probability: float, threshold: float = PREDICTION_THRESHOLD) -> str:
+def parse_api_error(response: requests.Response) -> str:
+    try:
+        detail = response.json().get("detail", response.text)
+        if isinstance(detail, list):
+            return "; ".join(str(item) for item in detail)
+        return str(detail)
+    except Exception:
+        return response.text or f"Erreur HTTP {response.status_code}"
+
+
+def api_health_check() -> dict | None:
+    try:
+        response = requests.get(f"{API_BASE_URL}/health", timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except Exception:
+        return None
+
+
+def api_predict_single(raw_features: dict) -> dict:
+    payload = build_storm_features_payload(raw_features)
+    response = requests.post(
+        f"{API_BASE_URL}/predict",
+        json=payload,
+        timeout=API_TIMEOUT,
+    )
+    if not response.ok:
+        raise RuntimeError(parse_api_error(response))
+
+    data = response.json()
+    is_storm = data["prediction"] == "storm"
+    return {
+        "prediction": 1 if is_storm else 0,
+        "probability": float(data["probability"]),
+        "threshold": float(data["threshold"]),
+        "confidence": CONFIDENCE_FR.get(data["confidence"], data["confidence"]),
+        "payload": payload,
+    }
+
+
+def api_predict_batch(df: pd.DataFrame, progress_bar=None) -> pd.DataFrame:
+    df_prepared = prepare_batch_for_api(df)
+    csv_bytes = df_prepared.to_csv(index=False).encode("utf-8")
+
+    if progress_bar is not None:
+        progress_bar.progress(0.25, text="Envoi du fichier à l'API Aurora…")
+
+    response = requests.post(
+        f"{API_BASE_URL}/predict/batch",
+        files={"file": ("batch.csv", csv_bytes, "text/csv")},
+        timeout=API_TIMEOUT,
+    )
+    if not response.ok:
+        raise RuntimeError(parse_api_error(response))
+
+    if progress_bar is not None:
+        progress_bar.progress(0.85, text="Réception des résultats…")
+
+    return pd.read_csv(io.BytesIO(response.content))
+
+
+def confidence_label(probability: float, threshold: float) -> str:
     diff = abs(probability - threshold)
     if diff > 0.30:
         return "Élevée"
@@ -648,47 +749,10 @@ def confidence_label(probability: float, threshold: float = PREDICTION_THRESHOLD
     return "Faible"
 
 
-def risk_label(prediction: int) -> str:
-    return "Risque Élevé" if prediction == 1 else "Risque Faible"
-
-
-def mock_api_call(data, progress_bar=None):
-    """
-    Simule un appel à l'API FastAPI Aurora.
-    # TODO: replace with requests.post("http://localhost:8000/predict", json=payload)
-    # TODO: replace with requests.post("http://localhost:8000/predict/batch", files=...)
-    """
-    time.sleep(0.6)
-
-    if isinstance(data, pd.DataFrame):
-        probas = []
-        total = len(data)
-        for idx, (_, row) in enumerate(data.iterrows()):
-            score = compute_storm_score(row)
-            prob = min(0.99, max(0.01, score + np.random.normal(0, 0.04)))
-            probas.append(prob)
-            if progress_bar is not None and total > 0:
-                progress_bar.progress(min(1.0, (idx + 1) / total))
-
-        predictions = [1 if p >= PREDICTION_THRESHOLD else 0 for p in probas]
-        return {
-            "predictions": predictions,
-            "probabilities": probas,
-            "threshold": PREDICTION_THRESHOLD,
-        }
-
-    payload = enrich_payload(data)
-    score = compute_storm_score(payload)
-    probability = min(0.99, max(0.01, score + np.random.normal(0, 0.04)))
-    prediction = 1 if probability >= PREDICTION_THRESHOLD else 0
-
-    return {
-        "prediction": prediction,
-        "probability": probability,
-        "threshold": PREDICTION_THRESHOLD,
-        "confidence": confidence_label(probability),
-        "payload": payload,
-    }
+def risk_label(prediction) -> str:
+    if isinstance(prediction, str):
+        return "Risque Élevé" if prediction == "storm" else "Risque Faible"
+    return "Risque Élevé" if int(prediction) == 1 else "Risque Faible"
 
 
 # =================================================================
@@ -697,11 +761,14 @@ def mock_api_call(data, progress_bar=None):
 if "page" not in st.session_state:
     st.session_state.page = "Predict"
 
-# Logo | 3 onglets adjacents | badge — une ligne, sans colonnes vides
-header_cols = st.columns([2.2, 0.9, 0.9, 0.9, 2.2], gap="small")
+header_cols = st.columns([1.3, 3.4, 1.3], gap="small")
 
 with header_cols[0]:
-    logo_path = Path("assets/logo.png")
+    st.markdown('<span class="header-row-marker aurora-marker"></span>', unsafe_allow_html=True)
+    # Calcul du chemin absolu vers la racine du projet à partir de ce fichier
+    # (app/ui/app.py -> remonter de 2 niveaux pour atteindre la racine)
+    root_path = Path(__file__).parents[2]
+    logo_path = root_path / "assets" / "logo.png"
     try:
         logo_base64 = get_base64_image(str(logo_path))
         st.markdown(
@@ -722,22 +789,29 @@ with header_cols[0]:
             unsafe_allow_html=True,
         )
 
-for col, (page_key, btn_key) in zip(
-    header_cols[1:4],
-    [("Predict", "nav1"), ("Batch", "nav2"), ("About", "nav3")],
-):
-    with col:
-        if st.button(nav_button_label(page_key), key=btn_key):
-            st.session_state.page = page_key
+with header_cols[1]:
+    nav_cols = st.columns(3, gap="small")
+    for col, (page_key, btn_key) in zip(nav_cols, [("Predict", "nav1"), ("Batch", "nav2"), ("About", "nav3")]):
+        with col:
+            if st.button(NAV_ITEMS[page_key].upper(), key=btn_key):
+                st.session_state.page = page_key
+            render_nav_slot(page_key)
 
-with header_cols[4]:
+with header_cols[2]:
+    health = api_health_check()
+    if health and health.get("model_loaded"):
+        status_dot = "#4fd1c5"
+        status_text = "API connectée"
+    else:
+        status_dot = "#ed64a6"
+        status_text = "API hors ligne"
     st.markdown(
-        """
+        f"""
         <div class="header-status">
             <div class="status-badge">
-                <span style="color: #4fd1c5; font-size: 0.6rem;">●</span>
+                <span style="color: {status_dot}; font-size: 0.6rem;">●</span>
                 <span style="color: white; font-size: 0.6rem; font-weight: 600;">
-                    Modèle <span style="color: #718096;">v2.4.1</span>
+                    {status_text} <span style="color: #718096;">v2.4.1</span>
                 </span>
             </div>
         </div>
@@ -754,8 +828,8 @@ if st.session_state.page == "Predict":
     section_header(
         "Analyse de télémétrie en temps réel",
         'Prédire la <span>danse des aurores</span>',
-        "Saisissez les 11 paramètres scientifiques OMNI2 pour estimer la probabilité "
-        "d'une tempête géomagnétique dans les 6 prochaines heures.",
+        "Saisissez les paramètres OMNI2 pour une prédiction via l'API Aurora "
+        "(POST /predict) — horizon 6 heures.",
     )
 
     st.markdown('<span class="predict-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
@@ -770,41 +844,35 @@ if st.session_state.page == "Predict":
 
             with f1:
                 render_label("Vitesse vent solaire", "km/s")
-                sw_speed = st.number_input("sws", 200.0, 2000.0, 391.0, 10.0, label_visibility="collapsed")
+                sw_speed = st.number_input("sws", 200.0, 1200.0, 391.0, 10.0, label_visibility="collapsed")
                 render_help("Typique : 300–800")
 
                 render_label("Densité vent solaire", "p/cm³")
-                sw_density = st.number_input("swd", 0.0, 200.0, 4.9, 0.1, label_visibility="collapsed")
+                sw_density = st.number_input("swd", 0.0, 100.0, 4.9, 0.1, label_visibility="collapsed")
                 render_help("Densité du plasma interplanétaire")
 
                 render_label("Composante Bz", "nT")
-                bz = st.number_input("bz", -100.0, 100.0, -0.2, 0.1, label_visibility="collapsed")
+                bz = st.number_input("bz", -50.0, 30.0, -0.2, 0.1, label_visibility="collapsed")
                 render_help("Sudward (négatif) = risque de reconnexion")
 
-                render_label("Pression dynamique", "nPa")
-                sw_pressure = st.number_input("swp", 0.0, 20000000.0, 787989.0, 1000.0, label_visibility="collapsed")
-                render_help("Pression du vent solaire")
-
-                render_label("Bz minimum (3 h)", "nT")
-                bz_min_3h = st.number_input("bzmin", -100.0, 100.0, -1.2, 0.1, label_visibility="collapsed")
-                render_help("Minimum glissant sur 3 heures")
-
-                render_label("Variation Dst (3 h)", "nT/3h")
-                dst_rate = st.number_input("dstr", -500.0, 500.0, 0.0, 1.0, label_visibility="collapsed")
-                render_help("Vitesse de dégradation magnétique")
+                render_label("Mois d'observation", "1–12")
+                month = st.selectbox(
+                    "month",
+                    list(range(1, 13)),
+                    index=datetime.now().month - 1,
+                    format_func=lambda m: f"Mois {m}",
+                    label_visibility="collapsed",
+                )
+                render_help("Le calcul cyclique (sin/cos) est géré automatiquement")
 
             with f2:
                 render_label("Indice Dst", "nT")
-                dst = st.number_input("dst", -600.0, 100.0, -6.0, 1.0, label_visibility="collapsed")
+                dst = st.number_input("dst", -400.0, 50.0, -6.0, 1.0, label_visibility="collapsed")
                 render_help("Intensité de la tempête (Dst < −50 nT)")
-
-                render_label("Bz négatif", "Binaire")
-                bz_neg = st.selectbox("bzn", [0, 1], format_func=lambda x: "Oui" if x == 1 else "Non", label_visibility="collapsed")
-                render_help("Reconnexion magnétique active")
 
                 render_label("Maximum solaire", "Cycle")
                 solar_max = st.selectbox("smax", [0, 1], format_func=lambda x: "Oui" if x == 1 else "Non", label_visibility="collapsed")
-                render_help("Phase de maximum du cycle solaire")
+                render_help("Phase de maximum du cycle solaire 25")
 
                 render_label("Saison", "Nominal")
                 season = st.selectbox("season", SEASON_OPTIONS, label_visibility="collapsed")
@@ -825,42 +893,41 @@ if st.session_state.page == "Predict":
                 "solar_wind_speed": sw_speed,
                 "solar_wind_density": sw_density,
                 "bz_component": bz,
-                "solar_wind_pressure": sw_pressure,
-                "bz_min_3h": bz_min_3h,
                 "dst_index": dst,
-                "dst_rate_change": dst_rate,
-                "bz_negative": bz_neg,
+                "month": month,
                 "is_solar_maximum": solar_max,
                 "season": season,
                 "hour_interval": hour,
             }
 
-            with st.spinner("Analyse des motifs spectraux en cours…"):
-                result = mock_api_call(input_data)
+            try:
+                with st.spinner("Appel API Aurora en cours…"):
+                    result = api_predict_single(input_data)
 
-            status_class = "status-high" if result["prediction"] == 1 else "status-low"
-            status_text = risk_label(result["prediction"])
-            narrative = (
-                "Une perturbation géomagnétique majeure est probable. Aurores visibles possibles aux hautes latitudes."
-                if result["prediction"] == 1
-                else "Conditions magnétosphériques stables. Aucune tempête majeure attendue sur l'horizon de 6 h."
-            )
+                status_class = "status-high" if result["prediction"] == 1 else "status-low"
+                status_text = risk_label(result["prediction"])
+                narrative = (
+                    "Une perturbation géomagnétique majeure est probable. Aurores visibles possibles aux hautes latitudes."
+                    if result["prediction"] == 1
+                    else "Conditions magnétosphériques stables. Aucune tempête majeure attendue sur l'horizon de 6 h."
+                )
 
-            st.markdown(
-                f"""
-                <div class="result-panel">
-                    <div class="prob-val">{result['probability'] * 100:.1f}%</div>
-                    <div class="result-status">{status_text}</div>
-                    <div class="status-pill {status_class}">Confiance {result['confidence'].lower()}</div>
-                    <div class="result-meta">
-                        <b>Seuil de décision :</b> {result['threshold']}<br>
-                        <b>Interaction Bz×Dst :</b> {result['payload']['bz_dst_interaction']:.1f} nT²<br><br>
-                        {narrative}
+                st.markdown(
+                    f"""
+                    <div class="result-panel">
+                        <div class="prob-val">{result['probability'] * 100:.1f}%</div>
+                        <div class="result-status">{status_text}</div>
+                        <div class="status-pill {status_class}">Confiance {result['confidence'].lower()}</div>
+                        <div class="result-meta">
+                            <b>Seuil de décision :</b> {result['threshold']}<br><br>
+                            {narrative}
+                        </div>
                     </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                    """,
+                    unsafe_allow_html=True,
+                )
+            except Exception as exc:
+                st.error(f"Échec de l'appel API ({API_BASE_URL}/predict) : {exc}")
         else:
             st.markdown(
                 """
@@ -896,8 +963,9 @@ elif st.session_state.page == "Batch":
         st.markdown(
             f"""
             <div class="upload-intro">
-                Colonnes attendues (11 features) :<br>
-                <code>{", ".join(REQUIRED_BATCH_COLUMNS)}</code>
+                Colonnes minimales (POST /predict/batch) :<br>
+                <code>{", ".join(REQUIRED_BATCH_COLUMNS)}</code><br>
+                <span style="font-size:0.82rem;">month, sin_month, cos_month ajoutés automatiquement si absents.</span>
             </div>
             <div class="upload-zone-header">
                 <div class="icon">☁️</div>
@@ -928,26 +996,25 @@ elif st.session_state.page == "Batch":
 
                 if st.button("Lancer l'analyse du lot", key="batch_run"):
                     progress = st.progress(0.0, text="Initialisation du pipeline d'inférence…")
-                    with st.spinner("Traitement de la télémétrie collective…"):
-                        if "bz_dst_interaction" not in df_batch.columns:
-                            df_batch = df_batch.copy()
-                            df_batch["bz_dst_interaction"] = df_batch["bz_component"] * df_batch["dst_index"]
-                        results = mock_api_call(df_batch, progress_bar=progress)
-                        progress.progress(1.0, text="Analyse terminée")
+                    try:
+                        with st.spinner("Traitement via l'API Aurora…"):
+                            df_results = api_predict_batch(df_batch, progress_bar=progress)
+                            progress.progress(1.0, text="Analyse terminée")
 
-                    df_results = df_batch.copy()
-                    df_results["probabilité"] = results["probabilities"]
-                    df_results["probabilité_%"] = df_results["probabilité"].map(lambda p: f"{p:.1%}")
-                    df_results["résultat"] = [risk_label(r) for r in results["predictions"]]
-                    df_results["confiance"] = df_results["probabilité"].map(confidence_label)
-                    st.session_state.batch_results = df_results
-                    st.session_state.batch_done = True
+                        threshold = float(df_results["threshold"].iloc[0]) if "threshold" in df_results.columns else 0.28
+                        df_results["probabilité_%"] = df_results["probability"].map(lambda p: f"{float(p):.1%}")
+                        df_results["résultat"] = df_results["prediction"].map(risk_label)
+                        df_results["confiance"] = df_results["probability"].map(
+                            lambda p: confidence_label(float(p), threshold)
+                        )
+                        st.session_state.batch_results = df_results
+                        st.session_state.batch_done = True
+                    except Exception as exc:
+                        st.error(f"Échec de l'appel API ({API_BASE_URL}/predict/batch) : {exc}")
 
                 if st.session_state.get("batch_done"):
                     st.markdown('<div class="card-title-sm">Résultats enrichis</div>', unsafe_allow_html=True)
-                    display_df = st.session_state.batch_results[
-                        [c for c in st.session_state.batch_results.columns if c != "probabilité"]
-                    ]
+                    display_df = st.session_state.batch_results.copy()
                     st.dataframe(
                         display_df,
                         use_container_width=True,
@@ -984,26 +1051,24 @@ elif st.session_state.page == "About":
     info_cols = st.columns(3, gap="medium")
     info_cards = [
         (
-            "Architecture",
-            "Le cœur du système repose sur une <b>Forêt Aléatoire (Random Forest)</b> "
-            "combinée à une stratégie de <b>sous-échantillonnage (Undersampling)</b> "
-            "pour compenser le fort déséquilibre des classes (~8,5 % de tempêtes). "
-            "Le seuil de décision optimal est fixé à <b>0,28</b> pour maximiser le rappel.",
+            "Intelligence API",
+            "Contrairement aux versions précédentes, l'<b>API Aurora v2</b> est désormais 'intelligente'. "
+            "Elle calcule automatiquement les features physiques (pression, bz_negative) "
+            "et temporelles (sin/cos month, interactions) à partir des données brutes. "
+            "Cela simplifie l'intégration pour n'importe quel système tiers.",
         ),
         (
-            "Données",
-            "Les features proviennent du jeu <b>NASA OMNI2</b> (vent solaire au point L1) "
-            "et la cible des événements officiels <b>NASA DONKI</b>. "
-            "Onze paramètres scientifiques alimentent le pipeline, enrichis par des "
-            "features d'interaction (<code>bz_dst_interaction</code>) et temporelles "
-            "(<code>dst_rate_change</code>, encodage cyclique du mois).",
+            "Algorithme",
+            "Le modèle utilise un <b>Random Forest</b> optimisé. La stratégie de "
+            "<b>sous-échantillonnage (Undersampling)</b> a été choisie pour traiter le "
+            "déséquilibre naturel des tempêtes (8,5%). Le seuil de décision est calibré "
+            "à <b>0,28</b> pour garantir une détection maximale des risques.",
         ),
         (
-            "Limites connues",
-            "<b>Faux positifs :</b> le modèle privilégie le rappel (92,2 %), ce qui peut "
-            "générer des alertes sur des événements mineurs.<br><br>"
-            "<b>Dépendance capteurs :</b> la qualité dépend des satellites DSCOVR/ACE.<br><br>"
-            "<b>Horizon :</b> prédiction limitée à 6 heures, sans capacité de prévision à long terme.",
+            "Priorité Métier",
+            "Le système privilégie le <b>Rappel (Recall > 90%)</b>. L'objectif est de "
+            "ne manquer aucune tempête pour protéger les réseaux électriques et satellites, "
+            "quitte à accepter un taux de faux positifs plus élevé pour une sécurité maximale.",
         ),
     ]
 

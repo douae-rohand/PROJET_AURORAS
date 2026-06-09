@@ -1,0 +1,6 @@
+solar_wind_speed,solar_wind_density,bz_component,dst_index,month,season,hour_interval,is_solar_maximum
+280.0,1.5,5.0,10.0,7,ete,09-12,0
+750.0,10.5,-18.5,-140.0,3,printemps,18-21,1
+310.0,2.0,3.8,5.0,7,ete,09-12,0
+650.0,8.0,-15.0,-110.0,11,automne,21-24,1
+400.0,4.0,1.2,-20.0,5,printemps,06-09,1

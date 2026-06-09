@@ -12,7 +12,7 @@ from pathlib import Path
 # CONFIGURATION DE LA PAGE
 # =================================================================
 st.set_page_config(
-    page_title="AURORA - Ethereal Space Weather ML",
+    page_title="AURORA - Prédiction des Tempêtes Géomagnétiques",
     page_icon="✨",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -157,7 +157,6 @@ st.markdown("""
 
     /* Navigation */
     .stButton > button[key^="nav"] {
-        background: linear-gradient(135deg, #6b46c1 0%, #4fd1c5 100%) !important;
         border: none !important;
         color: white !important;
         border-radius: 12px !important;
@@ -165,16 +164,28 @@ st.markdown("""
         font-size: 0.75rem !important;
         font-weight: 700 !important;
         letter-spacing: 0.05em !important;
-        box-shadow: 0 0 15px rgba(128, 90, 213, 0.3) !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* Animation plus fluide et "rebondissante" */
         white-space: nowrap !important;
         width: 100% !important;
         min-width: 110px !important;
     }
 
+    /* Style inactif par défaut - Très sobre */
+    .stButton > button[key^="nav"] {
+        background: rgba(255, 255, 255, 0.03) !important;
+        color: rgba(26, 32, 44, 0.4) !important; /* Gris très estompé */
+        box-shadow: none !important;
+        border: 1px solid rgba(0, 0, 0, 0.05) !important;
+        transform: scale(0.95); /* Légèrement plus petit */
+    }
+
+    /* Hover sur boutons inactifs - S'illumine au passage */
     .stButton > button[key^="nav"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 20px rgba(79, 209, 197, 0.5) !important;
+        transform: translateY(-2px) scale(1) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+        color: #1a202c !important;
+        background: rgba(255, 255, 255, 0.8) !important;
+        border-color: #4fd1c5 !important;
     }
 
     .nav-slot {
@@ -330,7 +341,7 @@ st.markdown("""
 
     .stButton > button:not([key^="nav"]) {
         width: 100% !important;
-        background: linear-gradient(90deg, #6b46c1 0%, #d53f8c 50%, #4fd1c5 100%) !important;
+        background: linear-gradient(90deg, #d53f8c 0%, #ed64a6 100%) !important;
         color: white !important;
         border: none !important;
         padding: 18px !important;
@@ -352,11 +363,11 @@ st.markdown("""
     .stButton > button:not([key^="nav"]):hover,
     .stDownloadButton > button:hover {
         transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(79, 209, 197, 0.5) !important;
+        box-shadow: 0 15px 35px rgba(213, 63, 140, 0.5) !important;
     }
 
     .stDownloadButton > button {
-        background: linear-gradient(90deg, #6b46c1 0%, #d53f8c 50%, #4fd1c5 100%) !important;
+        background: linear-gradient(90deg, #d53f8c 0%, #ed64a6 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 14px !important;
@@ -364,6 +375,7 @@ st.markdown("""
         letter-spacing: 0.08em !important;
         padding: 0.85rem 1.5rem !important;
         margin-top: 1rem !important;
+        box-shadow: 0 6px 15px rgba(213, 63, 140, 0.2) !important;
     }
 
     /* Résultats */
@@ -687,15 +699,12 @@ def render_help(help_text: str) -> None:
     st.markdown(f'<div class="sub-help">{help_text}</div>', unsafe_allow_html=True)
 
 
-def risk_label(prediction_value: int) -> str:
-    return "RISQUE ÉLEVÉ" if prediction_value == 1 else "RISQUE FAIBLE"
+def risk_label_old(prediction_value: int) -> str:
+    return "RISQUE ELEVE" if prediction_value == 1 else "RISQUE FAIBLE"
 
 
 def render_nav_slot(page_key: str) -> None:
-    if st.session_state.page == page_key:
-        st.markdown('<div class="nav-slot"><span class="nav-active-label">● actif</span></div>', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="nav-slot"><span class="nav-slot-spacer">&nbsp;</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="nav-slot"><span class="nav-slot-spacer">&nbsp;</span></div>', unsafe_allow_html=True)
 
 
 # =================================================================
@@ -819,6 +828,32 @@ def risk_label(prediction) -> str:
 if "page" not in st.session_state:
     st.session_state.page = "Predict"
 
+# Injection CSS dynamique pour le bouton actif - Plus prononcé
+active_nav_index = {"Predict": 1, "Batch": 2, "About": 3}[st.session_state.page]
+st.markdown(f"""
+    <style>
+        /* On cible le bouton actif avec un style radicalement différent */
+        div[data-testid="stHorizontalBlock"]:has(.header-row-marker) div[data-testid="column"]:nth-child(2) div[data-testid="column"]:nth-child({active_nav_index}) button {{
+            background: linear-gradient(135deg, #6b46c1 0%, #4fd1c5 100%) !important;
+            color: white !important;
+            box-shadow: 0 8px 20px rgba(107, 70, 193, 0.3) !important;
+            transform: scale(1.05) !important;
+            border: none !important;
+            opacity: 1 !important;
+        }}
+        
+        /* Petit point indicateur sous le bouton actif */
+        div[data-testid="stHorizontalBlock"]:has(.header-row-marker) div[data-testid="column"]:nth-child(2) div[data-testid="column"]:nth-child({active_nav_index}) .nav-slot {{
+            background: #4fd1c5;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin: 8px auto 0 auto;
+            box-shadow: 0 0 10px #4fd1c5;
+        }}
+    </style>
+""", unsafe_allow_html=True)
+
 header_cols = st.columns([1.3, 3.4, 1.3], gap="small")
 
 with header_cols[0]:
@@ -885,9 +920,10 @@ st.markdown('<hr class="header-divider">', unsafe_allow_html=True)
 if st.session_state.page == "Predict":
     section_header(
         "Analyse de télémétrie en temps réel",
-        'Prédire la <span>danse des aurores</span>',
-        "Saisissez les paramètres OMNI2 pour une prédiction via l'API Aurora "
-        "(POST /predict) — horizon 6 heures.",
+        'Anticiper les <span>tempêtes géomagnétiques</span>',
+        "AURORA prédit l'occurrence d'une tempête géomagnétique officielle (NASA DONKI) "
+        "dans les 6 prochaines heures à partir des mesures du vent solaire (OMNI2). "
+        "Les aurores boréales en sont une conséquence possible — mais ce n'est pas la cible du modèle.",
     )
 
     st.markdown('<span class="predict-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
@@ -965,9 +1001,12 @@ if st.session_state.page == "Predict":
                 status_class = "status-high" if result["prediction"] == 1 else "status-low"
                 status_text = risk_label(result["prediction"])
                 narrative = (
-                    "Une perturbation géomagnétique majeure est probable. Aurores visibles possibles aux hautes latitudes."
+                    "Tempête géomagnétique probable : perturbation magnétosphérique attendue. "
+                    "Risques pour réseaux électriques, satellites et GPS. "
+                    "Des aurores boréales pourraient être visibles aux hautes latitudes."
                     if result["prediction"] == 1
-                    else "Conditions magnétosphériques stables. Aucune tempête majeure attendue sur l'horizon de 6 h."
+                    else "Conditions magnétosphériques stables. Aucune tempête géomagnétique majeure "
+                    "anticipée sur l'horizon de 6 heures."
                 )
 
                 st.markdown(
@@ -1009,8 +1048,8 @@ elif st.session_state.page == "Batch":
     section_header(
         "Traitement de données collectives",
         'Analyse par <span>lot</span>',
-        "Importez un fichier CSV OMNI2 pour traiter plusieurs observations "
-        "et obtenir les probabilités de tempête en série.",
+        "Importez un fichier CSV OMNI2 pour estimer en série la probabilité de tempête "
+        "géomagnétique (horizon 6 h) via l'API POST /predict/batch.",
     )
 
     batch_col, = st.columns(1)
@@ -1085,9 +1124,18 @@ elif st.session_state.page == "Batch":
                         with st.spinner("Analyse du lot en cours via l'API Aurora..."):
                             df_results = api_predict_batch(df_batch)
                         
-                        threshold = float(df_results["threshold"].iloc[0]) if "threshold" in df_results.columns else 0.28
-                        df_results["résultat"] = df_results["prediction"].apply(risk_label)
-                        df_results["probabilité_%"] = df_results["probability"]
+                        # Ajout du verdict sans accents pour éviter les erreurs d'encodage
+                        df_results["resultat"] = df_results["prediction"].apply(risk_label)
+                        
+                        # On garde 'probability' (fournie par l'API) et on s'assure que 'resultat' est la toute dernière
+                        # On retire toute colonne en français avec accents qui aurait pu être créée
+                        cols_to_remove = ["probabilité_%", "résultat"]
+                        df_results = df_results.drop(columns=[c for c in cols_to_remove if c in df_results.columns])
+                        
+                        # Réorganisation : toutes les colonnes sauf 'resultat', puis 'resultat' en dernier
+                        cols = [c for c in df_results.columns if c != "resultat"] + ["resultat"]
+                        df_results = df_results[cols]
+                        
                         st.session_state.batch_results = df_results
                         st.session_state.batch_done = True
                     except Exception as exc:
@@ -1100,10 +1148,11 @@ elif st.session_state.page == "Batch":
                         st.session_state.batch_results,
                         use_container_width=True,
                         hide_index=True,
-                        column_order=("résultat", "probabilité_%", "solar_wind_speed", "solar_wind_density", "bz_component", "dst_index"),
+                        column_order=("resultat", "probability", "prediction", "solar_wind_speed", "solar_wind_density", "bz_component", "dst_index"),
                         column_config={
-                            "résultat": st.column_config.TextColumn("Verdict IA"),
-                            "probabilité_%": st.column_config.ProgressColumn("Probalité", format="%.2f", min_value=0, max_value=1),
+                            "resultat": st.column_config.TextColumn("Verdict IA"),
+                            "probability": st.column_config.ProgressColumn("Probabilité", format="%.2f", min_value=0, max_value=1),
+                            "prediction": st.column_config.TextColumn("Statut Brut"),
                             "solar_wind_speed": st.column_config.NumberColumn("Vitesse", format="%.0f km/s"),
                         },
                     )
@@ -1126,99 +1175,164 @@ elif st.session_state.page == "About":
     section_header(
         "Spécifications techniques",
         'Le moteur <span>Aurora</span>',
-        "Architecture, données et performances du modèle de prédiction "
-        "des tempêtes géomagnétiques à horizon 6 heures.",
+        "Système de prédiction des tempêtes géomagnétiques à 6 heures d'avance — "
+        "basé sur les catalogues officiels NASA DONKI et les mesures OMNI2 au point de Lagrange L1.",
     )
 
+    # --- Ligne 1 : mission, données, pipeline ---
     st.markdown('<span class="about-info-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
-    info_cols = st.columns(3, gap="medium")
-    info_cards = [
+    row1 = st.columns(3, gap="medium")
+    row1_cards = [
         (
-            "Intelligence API",
-            "Contrairement aux versions précédentes, l'<b>API Aurora v2</b> est désormais 'intelligente'. "
-            "Elle calcule automatiquement les features physiques (pression, bz_negative) "
-            "et temporelles (sin/cos month, interactions) à partir des données brutes. "
-            "Cela simplifie l'intégration pour n'importe quel système tiers.",
+            "Mission du modèle",
+            "AURORA répond à la question : <b>« Y aura-t-il une tempête géomagnétique officielle "
+            "dans les 6 prochaines heures ? »</b> La cible <code>is_storm</code> provient du "
+            "catalogue NASA DONKI (événements GST validés par des experts), pas d'un seuil arbitraire "
+            "comme Kp ≥ 5.<br><br>"
+            "<b>Important :</b> nous ne prédisons pas directement les aurores boréales. "
+            "Une tempête géomagnétique est un facteur majeur qui peut les rendre visibles, "
+            "mais d'autres conditions (nuages, latitude, activité nocturne) entrent aussi en jeu.",
         ),
         (
-            "Algorithme",
-            "Le modèle utilise un <b>Random Forest</b> optimisé. La stratégie de "
-            "<b>sous-échantillonnage (Undersampling)</b> a été choisie pour traiter le "
-            "déséquilibre naturel des tempêtes (8,5%). Le seuil de décision est calibré "
-            "à <b>0,28</b> pour garantir une détection maximale des risques.",
+            "Enjeu métier",
+            "Les tempêtes géomagnétiques peuvent induire des courants au sol capables de "
+            "<b>endommager les transformateurs des réseaux électriques</b>, de perturber le "
+            "<b>GPS</b> et les communications aéronautiques polaires. Le délai de 6 heures "
+            "permet aux opérateurs de mettre les satellites en mode survie, de délester les "
+            "réseaux sensibles ou de détourner les vols — tout en conservant un signal physique "
+            "fiable issu des satellites DSCOVR/ACE au point L1.",
         ),
         (
-            "Priorité Métier",
-            "Le système privilégie le <b>Rappel (Recall > 90%)</b>. L'objectif est de "
-            "ne manquer aucune tempête pour protéger les réseaux électriques et satellites, "
-            "quitte à accepter un taux de faux positifs plus élevé pour une sécurité maximale.",
+            "Jeu de données",
+            "<b>43 207</b> observations horaires (janv. 2019 — déc. 2023), fusion de deux flux NASA :<br>"
+            "• <b>OMNI2</b> (features X) : vent solaire recalé temporellement vers la Terre<br>"
+            "• <b>DONKI</b> (cible Y) : tempêtes géomagnétiques officielles<br><br>"
+            "Déséquilibre naturel : <b>8,5 %</b> de tempêtes / 91,5 % de calme (~1:11). "
+            "Padding temporel T−24h / T+72h autour des événements pour capturer montée et récupération.",
         ),
     ]
-
-    for col, (title, body) in zip(info_cols, info_cards):
+    for col, (title, body) in zip(row1, row1_cards):
         with col:
             info_card_marker()
             st.markdown(f'<div class="info-mini-card"><h4>{title}</h4><p>{body}</p></div>', unsafe_allow_html=True)
 
-    st.markdown('<div style="height: 1.75rem;"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
 
+    # --- Ligne 2 : algorithme, features, seuil ---
+    row2 = st.columns(3, gap="medium")
+    row2_cards = [
+        (
+            "Algorithme retenu",
+            "Parmi <b>12 configurations</b> testées (4 modèles × 3 stratégies de rééquilibrage), "
+            "la combinaison gagnante est <b>Random Forest + Undersampling</b> (Recall CV = 91,7 %).<br><br>"
+            "Hyperparamètres optimisés (GridSearchCV, 5 folds) :<br>"
+            "• <code>n_estimators</code> = 500<br>"
+            "• <code>max_depth</code> = 20<br>"
+            "• <code>min_samples_leaf</code> = 1<br>"
+            "• <code>max_features</code> = sqrt<br><br>"
+            "Pipeline : RobustScaler sur variables continues + One-Hot Encoding (saison, créneau horaire).",
+        ),
+        (
+            "Signaux physiques clés",
+            "Features les plus discriminantes identifiées en EDA et modélisation :<br>"
+            "• <b>Bz sudward</b> (reconnexion magnétique)<br>"
+            "• <b>Dst</b> (intensité de la tempête, Dst &lt; −50 nT = définition officielle)<br>"
+            "• <b>Vitesse du vent solaire</b> (51 % des outliers = tempêtes)<br>"
+            "• <b>bz_min_3h</b>, pression dynamique, interaction <code>bz×dst</code><br><br>"
+            "Les valeurs extrêmes sont <b>conservées</b> (outliers = signaux physiques, pas erreurs).",
+        ),
+        (
+            "Seuil de décision",
+            "Le seuil par défaut (0,5) n'est pas adapté aux données déséquilibrées. "
+            "Un seuil optimal <b>0,28</b> minimise le coût métier pondéré "
+            "<code>100 × FN + 1 × FP</code> sur le jeu de test (réduction de coût de 43,9 %).<br><br>"
+            "Coût d'un <b>faux négatif</b> (tempête manquée) = 100× celui d'un faux positif, "
+            "car l'enjeu est de ne rater aucune tempête critique pour les infrastructures.",
+        ),
+    ]
+    for col, (title, body) in zip(row2, row2_cards):
+        with col:
+            info_card_marker()
+            st.markdown(f'<div class="info-mini-card"><h4>{title}</h4><p>{body}</p></div>', unsafe_allow_html=True)
+
+    st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
+
+    # --- Métriques (jeu de test, seuil opérationnel 0,28) ---
     st.markdown('<span class="about-metrics-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
-    metrics_col, model_col = st.columns([1.2, 1], gap="large")
+    metrics_col, = st.columns(1)
 
     with metrics_col:
         card_marker()
-        st.markdown('<div class="card-title">Métriques de validation</div>', unsafe_allow_html=True)
-        m1, m2 = st.columns(2, gap="medium")
-        metrics = [
-            ("Recall (Sensibilité)", "92.2%"),
-            ("ROC AUC", "0.955"),
-            ("F1 Score", "0.526"),
-            ("Précision", "36.9%"),
+        st.markdown(
+            '<div class="card-title">Performances — jeu de test (6 482 obs.)</div>'
+            '<p style="color:#718096;font-size:0.88rem;margin:-1rem 0 1.5rem 0;">'
+            "Métriques au seuil opérationnel <b>0,28</b> (évaluation finale, notebook 06). "
+            "Le jeu de test n'a jamais été vu à l'entraînement ni au tuning.</p>",
+            unsafe_allow_html=True,
+        )
+        m1, m2, m3 = st.columns(3, gap="medium")
+        prod_metrics = [
+            ("Recall (Sensibilité)", "98,7 %", "Tempêtes détectées — objectif ≥ 80 % atteint"),
+            ("Précision", "23,4 %", "~1 alerte sur 4 est une vraie tempête"),
+            ("F1-Score", "0,379", "Compromis recall/précision au seuil 0,28"),
+            ("ROC-AUC", "0,964", "Excellente capacité de classement"),
+            ("PR-AUC", "0,767", "×9 vs baseline aléatoire (0,084)"),
+            ("Faux négatifs", "7 / 545", "36 FN au seuil 0,5 → 7 au seuil 0,28"),
         ]
-        for i, (title, value) in enumerate(metrics):
-            with (m1 if i % 2 == 0 else m2):
+        for i, (title, value, hint) in enumerate(prod_metrics):
+            target = [m1, m2, m3][i % 3]
+            with target:
                 st.markdown(
-                    f'<div class="metric-grid-item"><div class="metric-title">{title}</div>'
-                    f'<div class="metric-val">{value}</div></div>',
+                    f'<div class="metric-grid-item">'
+                    f'<div class="metric-title">{title}</div>'
+                    f'<div class="metric-val">{value}</div>'
+                    f'<div style="color:#718096;font-size:0.72rem;margin-top:0.5rem;line-height:1.4;">{hint}</div>'
+                    f"</div>",
                     unsafe_allow_html=True,
                 )
 
-    with model_col:
-        card_marker()
-        st.markdown('<div class="card-title">Fiche modèle</div>', unsafe_allow_html=True)
-        st.markdown(
-            """
-            <div class="model-desc">
-                Aurora classe chaque observation en <b>Risque Élevé</b> ou <b>Risque Faible</b>
-                en analysant l'interaction entre le vent solaire et la magnétosphère terrestre.
-                Le modèle est entraîné sur 5 ans de données horaires (2019–2023).
-            </div>
-            <div class="model-footer-card">
-                <div class="model-footer-row">
-                    <span class="model-footer-label">Version</span>
-                    <span class="model-footer-value">v2.4.1</span>
-                </div>
-                <div class="model-footer-row">
-                    <span class="model-footer-label">Jeu de données</span>
-                    <span class="model-footer-value">NASA OMNI2</span>
-                </div>
-                <div class="model-footer-row">
-                    <span class="model-footer-label">Algorithme</span>
-                    <span class="model-footer-value">Random Forest + Undersampling</span>
-                </div>
-                <div class="model-footer-row">
-                    <span class="model-footer-label">Statut</span>
-                    <span class="model-footer-status">Opérationnel</span>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+
+
+    st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
+
+    # --- Ligne 3 : limites ---
+    st.markdown('<span class="about-info-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
+    row3 = st.columns(3, gap="medium")
+    row3_cards = [
+        (
+            "Limites connues",
+            "• <b>Faux positifs élevés</b> : la précision au seuil 0,28 est de 23,4 % — "
+            "le modèle privilégie le rappel pour ne manquer aucune tempête critique.<br>"
+            "• <b>Dépendance capteurs</b> : qualité liée aux satellites DSCOVR/ACE et au recalage OMNI2.<br>"
+            "• <b>Horizon fixe</b> : prédiction à 6 h uniquement, pas de prévision à plusieurs jours.<br>"
+            "• <b>Pas de causalité aurore</b> : le modèle ne prévoit pas la visibilité des aurores boréales.",
+        ),
+        (
+            "Méthodologie",
+            "• Split temporel strict : train / validation / test sans fuite de données.<br>"
+            "• RobustScaler fitté sur le train uniquement (anti data leakage).<br>"
+            "• SMOTE et class_weight testés mais Undersampling retenu pour le meilleur recall.<br>"
+            "• 12 modèles comparés : Régression logistique, Arbre, Random Forest, XGBoost.<br>"
+            "• Métrique prioritaire : <b>Recall</b> (minimiser les tempêtes non détectées).",
+        ),
+        (
+            "Objectifs Phase 1",
+            "Vérification au seuil optimal 0,28 sur le jeu de test :<br>"
+            "• Recall ≥ 0,80 → <b style='color:#4fd1c5;'>ATTEINT</b> (0,987)<br>"
+            "• Précision ≥ 0,50 → <b style='color:#ed64a6;'>NON ATTEINT</b> (0,234)<br><br>"
+            "Le compromis est assumé : en météorologie spatiale opérationnelle, "
+            "rater une tempête coûte bien plus cher qu'une fausse alerte.",
+        ),
+    ]
+    for col, (title, body) in zip(row3, row3_cards):
+        with col:
+            info_card_marker()
+            st.markdown(f'<div class="info-mini-card"><h4>{title}</h4><p>{body}</p></div>', unsafe_allow_html=True)
 
 # =================================================================
 # FOOTER
 # =================================================================
 st.markdown(
-    f'<div class="page-footer">AURORA SYSTEM · SPACE WEATHER ANALYTICS · {datetime.now().year}</div>',
+    f'<div class="page-footer">AURORA · PRÉDICTION DES TEMPÊTES GÉOMAGNÉTIQUES · {datetime.now().year}</div>',
     unsafe_allow_html=True,
 )

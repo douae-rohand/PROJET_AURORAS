@@ -1,0 +1,32 @@
+# ── Dockerfile.api ──────────────────────────────────────────────
+# Image : python:3.11-slim
+# Service : API REST FastAPI — PROJET_AURORAS
+# ────────────────────────────────────────────────────────────────
+
+FROM python:3.11-slim
+
+# Variables d'environnement configurables
+ENV APP_PORT=8000 \
+    LOG_LEVEL=info \
+    MODEL_PATH=/app/models/final_model.joblib \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# ── Étape 1 : dépendances (couche cachée séparément du code) ────
+# On copie requirements AVANT le code pour bénéficier du cache Docker :
+# si le code change mais pas les dépendances, cette couche n'est pas reconstruite.
+COPY requirements-api.txt .
+RUN pip install --no-cache-dir -r requirements-api.txt
+
+# ── Étape 2 : modèle sérialisé ──────────────────────────────────
+COPY models/final_model.joblib /app/models/final_model.joblib
+
+# ── Étape 3 : code applicatif ───────────────────────────────────
+COPY app/ /app/app/
+
+EXPOSE ${APP_PORT}
+
+# Démarrage via uvicorn — le module est app.api.main, objet FastAPI = app
+CMD ["sh", "-c", "uvicorn app.api.main:app --host 0.0.0.0 --port ${APP_PORT} --log-level ${LOG_LEVEL}"]

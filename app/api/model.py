@@ -28,11 +28,10 @@ try:
             "recall_test_default"   : data["recall_test_default_threshold"],
             "pr_auc_test"           : data["pr_auc_test"]
         },
+        # Colonnes d'entrée attendues par l'API (les features dérivées sont calculées en interne)
         "features": [
             "solar_wind_speed", "solar_wind_density", "bz_component",
-            "solar_wind_pressure", "bz_min_3h", "dst_index",
-            "month", "sin_month", "cos_month", "season",
-            "hour_interval", "bz_negative", "is_solar_maximum"
+            "dst_index", "month", "season", "hour_interval", "is_solar_maximum"
         ]
     }
     logger.info(f"Modèle '{MODEL_METADATA['model_type']}' chargé (seuil={THRESHOLD})")
@@ -49,14 +48,33 @@ except Exception as e:
 # ============================================================
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Recrée le feature engineering de la Phase 2 à la volée :
-      - Interaction physique bz × dst
-      - Imputation de dst_rate_change (variable temporelle)
-      - One-Hot Encoding de 'season' et 'hour_interval'
+    Recrée le feature engineering complet à la volée :
+      - Pression solaire (physique)
+      - Encodage cyclique du mois
+      - Signe de Bz (bz_negative)
+      - Interaction bz × dst
+      - Variables de fenêtre (bz_min_3h, dst_rate_change)
+      - One-Hot Encoding (season, hour_interval)
     """
     df = df.copy()
 
-    # 1. Feature d'interaction physique
+    # 1. Features physiques de base
+    if "solar_wind_density" in df.columns and "solar_wind_speed" in df.columns:
+        df["solar_wind_pressure"] = df["solar_wind_density"] * (df["solar_wind_speed"]**2)
+
+    if "bz_component" in df.columns:
+        df["bz_negative"] = (df["bz_component"] < 0).astype(int)
+        # En prédiction unitaire, on ne connaît pas le passé, donc min_3h = bz actuel
+        if "bz_min_3h" not in df.columns:
+            df["bz_min_3h"] = df["bz_component"]
+
+    # 2. Encodage cyclique du mois
+    if "month" in df.columns:
+        import numpy as np
+        df['sin_month'] = np.sin(2 * np.pi * df['month'] / 12)
+        df['cos_month'] = np.cos(2 * np.pi * df['month'] / 12)
+
+    # 3. Feature d'interaction bz × dst
     if "bz_component" in df.columns and "dst_index" in df.columns:
         df["bz_dst_interaction"] = df["bz_component"] * df["dst_index"]
 

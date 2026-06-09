@@ -1,0 +1,1338 @@
+import io
+import os
+import streamlit as st
+import pandas as pd
+import requests
+import base64
+import math
+from datetime import datetime
+from pathlib import Path
+
+# =================================================================
+# CONFIGURATION DE LA PAGE
+# =================================================================
+st.set_page_config(
+    page_title="AURORA - Prédiction des Tempêtes Géomagnétiques",
+    page_icon="✨",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
+
+# =================================================================
+# STYLE CSS "AURORA BOREALIS PREMIUM"
+# =================================================================
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    /* Reset global */
+    html, body, [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
+        font-family: 'Inter', sans-serif !important;
+        color: #2d3748 !important;
+    }
+
+    .main .block-container,
+    [data-testid="stAppViewBlockContainer"] {
+        padding-top: 0.35rem !important;
+        padding-left: 6% !important;
+        padding-right: 6% !important;
+        max-width: 100% !important;
+    }
+
+    [data-testid="stHeader"] { background: rgba(0,0,0,0); height: 0; }
+    [data-testid="stDecoration"] { display: none; }
+
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    [data-testid="stSidebar"] { display: none; }
+    [data-testid="stToolbar"] { display: none; }
+
+    /* Neutraliser les cadres Streamlit vides */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    /* Marqueurs invisibles pour ancrer le style sur les colonnes */
+    .aurora-marker,
+    .aurora-page-marker,
+    .header-row-marker,
+    .predict-grid-marker,
+    .about-info-grid-marker,
+    .about-metrics-grid-marker {
+        display: none !important;
+    }
+
+    /* Panneaux glassmorphism — appliqués sur la colonne Streamlit */
+    div[data-testid="column"]:has(.aurora-card-marker) > div[data-testid="stVerticalBlock"] {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    div[data-testid="column"]:has(.info-card-marker) > div[data-testid="stVerticalBlock"] {
+        background: rgba(255, 255, 255, 0.4);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 20px;
+        padding: 1.75rem;
+        height: 100%;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.predict-grid-marker),
+    div[data-testid="stHorizontalBlock"]:has(.about-info-grid-marker),
+    div[data-testid="stHorizontalBlock"]:has(.about-metrics-grid-marker) {
+        align-items: stretch !important;
+        gap: 1.5rem !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.predict-grid-marker) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.about-info-grid-marker) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.about-metrics-grid-marker) > div[data-testid="column"] {
+        align-self: stretch !important;
+    }
+
+    /* Header — compact, collé en haut */
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) {
+        margin-top: -0.75rem !important;
+        align-items: center !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) > div[data-testid="column"] {
+        padding-top: 0 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) [data-testid="stVerticalBlock"] {
+        gap: 0.2rem !important;
+        padding-top: 0 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) [data-testid="stVerticalBlock"] > div {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.header-row-marker) .stButton > button {
+        margin-top: 0 !important;
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+    }
+
+    .header-logo-container {
+        display: flex;
+        align-items: center;
+        padding: 0;
+        margin-left: -35px;
+        margin-top: -22px;
+    }
+
+    .logo-img {
+        max-width: 130px;
+        height: auto;
+        filter: drop-shadow(0 0 12px rgba(128, 90, 213, 0.4));
+    }
+
+    .header-status {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding-top: 0;
+        margin-top: -8px;
+        height: 100%;
+    }
+
+    .status-badge {
+        background: rgba(79, 209, 197, 0.1);
+        border-radius: 20px;
+        padding: 4px 12px;
+        border: 1px solid rgba(79, 209, 197, 0.4);
+        white-space: nowrap;
+    }
+
+    /* Navigation */
+    .stButton > button[key^="nav"] {
+        border: none !important;
+        color: white !important;
+        border-radius: 12px !important;
+        padding: 6px 16px !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* Animation plus fluide et "rebondissante" */
+        white-space: nowrap !important;
+        width: 100% !important;
+        min-width: 110px !important;
+    }
+
+    /* Style inactif par défaut - Très sobre */
+    .stButton > button[key^="nav"] {
+        background: rgba(255, 255, 255, 0.03) !important;
+        color: rgba(26, 32, 44, 0.4) !important; /* Gris très estompé */
+        box-shadow: none !important;
+        border: 1px solid rgba(0, 0, 0, 0.05) !important;
+        transform: scale(0.95); /* Légèrement plus petit */
+    }
+
+    /* Hover sur boutons inactifs - S'illumine au passage */
+    .stButton > button[key^="nav"]:hover {
+        transform: translateY(-2px) scale(1) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+        color: #1a202c !important;
+        background: rgba(255, 255, 255, 0.8) !important;
+        border-color: #4fd1c5 !important;
+    }
+
+    .nav-slot {
+        min-height: 18px;
+        text-align: center;
+        margin-top: 6px;
+    }
+
+    .nav-active-label {
+        font-size: 0.6rem;
+        color: #319795;
+        letter-spacing: 0.15em;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .nav-slot-spacer {
+        display: block;
+        height: 18px;
+    }
+
+    .header-divider {
+        border: none;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        margin: 0.25rem 0 2.5rem 0;
+    }
+
+    /* Sections */
+    .section-intro {
+        margin-bottom: 3rem;
+    }
+
+    .card-title {
+        color: #1a202c;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        margin-bottom: 1.75rem;
+        margin-top: 0;
+    }
+
+    .card-title-sm {
+        color: #1a202c;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        margin: 2rem 0 1rem 0;
+    }
+
+    .inference-tag {
+        color: #f6ad55;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        margin-bottom: 0.8rem;
+    }
+
+    .main-title {
+        font-family: 'Playfair Display', serif;
+        color: #1a202c;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .main-title span {
+        background: linear-gradient(135deg, #9f7aea 0%, #ed64a6 40%, #f6ad55 70%, #4fd1c5 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .lead-text {
+        color: #4a5568;
+        font-size: 1.1rem;
+        max-width: 720px;
+        line-height: 1.7;
+        margin-bottom: 0;
+    }
+
+    .info-mini-card h4 {
+        color: #f6ad55;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin: 0 0 1rem 0;
+    }
+
+    .info-mini-card p {
+        color: #4a5568;
+        font-size: 0.98rem;
+        line-height: 1.75;
+        font-weight: 400;
+        margin: 0;
+    }
+
+    /* Inputs */
+    .input-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.35rem;
+    }
+
+    .input-label-row span:first-child {
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .unit-tag {
+        color: #4fd1c5;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .sub-help {
+        color: #718096;
+        font-size: 0.75rem;
+        margin-bottom: 1.1rem;
+        margin-top: 0.15rem;
+    }
+
+    .stNumberInput input,
+    .stSelectbox [data-baseweb="select"] > div {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        color: #1a202c !important;
+        border-radius: 12px !important;
+    }
+
+    .stNumberInput input {
+        padding: 12px !important;
+        font-size: 1rem !important;
+    }
+
+    .stNumberInput input:focus {
+        border-color: #4fd1c5 !important;
+        box-shadow: 0 0 10px rgba(79, 209, 197, 0.2) !important;
+    }
+
+    label p {
+        color: #4a5568 !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .stButton > button:not([key^="nav"]) {
+        width: 100% !important;
+        background: linear-gradient(90deg, #d53f8c 0%, #ed64a6 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 18px !important;
+        font-weight: 700 !important;
+        border-radius: 16px !important;
+        font-size: 1.1rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        box-shadow: 0 10px 25px rgba(213, 63, 140, 0.3) !important;
+        transition: all 0.4s ease !important;
+        margin-top: 1.5rem !important;
+    }
+
+    [data-testid="stForm"] {
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    .stButton > button:not([key^="nav"]):hover,
+    .stDownloadButton > button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(213, 63, 140, 0.5) !important;
+    }
+
+    .stDownloadButton > button {
+        background: linear-gradient(90deg, #d53f8c 0%, #ed64a6 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 14px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.08em !important;
+        padding: 0.85rem 1.5rem !important;
+        margin-top: 1rem !important;
+        box-shadow: 0 6px 15px rgba(213, 63, 140, 0.2) !important;
+    }
+
+    /* Résultats */
+    .prob-val {
+        font-family: 'Playfair Display', serif;
+        background: linear-gradient(135deg, #f6ad55, #4fd1c5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 5.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-pill {
+        display: inline-block;
+        padding: 0.45rem 1.25rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 1.25rem;
+    }
+
+    .status-high {
+        background: rgba(237, 100, 166, 0.15);
+        border: 1px solid rgba(237, 100, 166, 0.45);
+        color: #ed64a6;
+    }
+
+    .status-low {
+        background: rgba(79, 209, 197, 0.12);
+        border: 1px solid rgba(79, 209, 197, 0.35);
+        color: #4fd1c5;
+    }
+
+    .result-status {
+        color: #1a202c;
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .result-meta {
+        color: #4a5568;
+        line-height: 1.7;
+        max-width: 380px;
+        margin: 0 auto;
+        font-size: 0.95rem;
+    }
+
+    .result-panel {
+        text-align: center;
+        padding: 1.5rem 0 1rem 0;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 460px;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    /* Batch upload */
+    /* ==========================================
+       NEW BATCH HUB DESIGN
+       ========================================== */
+    .batch-hub-container {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 24px;
+        padding: 0;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    .batch-hub-header {
+        background: #f8fafc;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .batch-hub-header .icon { font-size: 1.5rem; }
+    .batch-hub-header .title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a202c;
+    }
+
+    .batch-hub-content {
+        padding: 2rem;
+    }
+
+    .batch-guide-row {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .batch-guide-specs {
+        flex: 1.2;
+        background: #ffffff;
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .batch-upload-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .glossary-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .glossary-item .label {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        min-width: 130px;
+        text-align: center;
+    }
+
+    .glossary-item .desc { color: #64748b; }
+
+    div[data-testid="column"]:has(.batch-hub-marker) [data-testid="stFileUploader"] section {
+        background: #ffffff !important;
+        border: 2px dashed #e2e8f0 !important;
+        border-radius: 16px !important;
+        padding: 1rem 1.5rem !important;
+        transition: all 0.3s ease;
+        min-height: 90px !important;
+    }
+
+    div[data-testid="column"]:has(.batch-hub-marker) [data-testid="stFileUploader"] section:hover {
+        border-color: #4fd1c5 !important;
+        background: #f0fff4 !important;
+    }
+
+    .results-hub-header {
+        margin-top: 3rem;
+        padding-left: 1rem;
+        border-left: 4px solid #4fd1c5;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 1.5rem;
+    }
+
+    .upload-hint {
+        text-align: center;
+        color: #718096;
+        font-size: 0.88rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #9f7aea, #ed64a6, #f6ad55, #4fd1c5) !important;
+    }
+
+    /* Métriques */
+    .metric-grid-item {
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 20px;
+        padding: 1.75rem 1.25rem;
+        text-align: center;
+        transition: border-color 0.3s;
+        margin-bottom: 0.85rem;
+        height: calc(50% - 0.5rem);
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    }
+
+    .metric-grid-item:hover { border-color: #4fd1c5; }
+    .metric-title {
+        font-size: 0.75rem;
+        color: #718096;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        letter-spacing: 0.1em;
+    }
+    .metric-val {
+        font-size: 2.2rem;
+        color: #1a202c;
+        font-weight: 700;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .model-desc {
+        color: #4a5568;
+        font-size: 1rem;
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+    }
+
+    .model-footer-card {
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .model-footer-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.85rem;
+        font-size: 0.9rem;
+    }
+
+    .model-footer-label { color: #718096; }
+    .model-footer-value { color: #1a202c; font-weight: 600; }
+    .model-footer-status { color: #319795; font-weight: 600; }
+
+    [data-testid="stDataFrame"] {
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .page-footer {
+        text-align: center;
+        padding: 3.5rem 0 2.5rem 0;
+        color: #4a5568;
+        font-size: 0.8rem;
+        letter-spacing: 0.1em;
+    }
+
+    @media (max-width: 900px) {
+        .main .block-container { padding-left: 4% !important; padding-right: 4% !important; }
+        .main-title { font-size: 2.4rem; }
+        .prob-val { font-size: 4rem; }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# =================================================================
+# CONSTANTES & API
+# =================================================================
+API_BASE_URL = os.getenv("AURORA_API_URL", "http://localhost:8000").rstrip("/")
+API_TIMEOUT = int(os.getenv("AURORA_API_TIMEOUT", "60"))
+
+# Colonnes minimales attendues côté CSV (maintenant uniquement les données brutes)
+REQUIRED_BATCH_COLUMNS = [
+    "solar_wind_speed",
+    "solar_wind_density",
+    "bz_component",
+    "dst_index",
+    "month",
+    "season",
+    "hour_interval",
+    "is_solar_maximum",
+]
+
+CONFIDENCE_FR = {"high": "Élevée", "medium": "Moyenne", "low": "Faible"}
+
+NAV_ITEMS = {
+    "Predict": "Inférence",
+    "Batch": "Analyse",
+    "About": "Moteur",
+}
+
+SEASON_OPTIONS = ["printemps", "ete", "automne", "hiver"]
+HOUR_OPTIONS = [
+    "0h-3h", "3h-6h", "6h-9h", "9h-12h",
+    "12h-15h", "15h-18h", "18h-21h", "21h-24h",
+]
+
+# =================================================================
+# UTILITAIRES UI
+# =================================================================
+def card_marker() -> None:
+    st.markdown('<span class="aurora-card-marker aurora-marker"></span>', unsafe_allow_html=True)
+
+
+def info_card_marker() -> None:
+    st.markdown('<span class="info-card-marker aurora-marker"></span>', unsafe_allow_html=True)
+
+
+def section_header(tag: str, title_html: str, lead: str) -> None:
+    st.markdown(
+        f"""
+        <div class="section-intro">
+            <div class="inference-tag">{tag}</div>
+            <div class="main-title">{title_html}</div>
+            <p class="lead-text">{lead}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_label(label: str, unit: str) -> None:
+    st.markdown(
+        f'<div class="input-label-row"><span>{label}</span><span class="unit-tag">{unit}</span></div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_help(help_text: str) -> None:
+    st.markdown(f'<div class="sub-help">{help_text}</div>', unsafe_allow_html=True)
+
+
+def risk_label_old(prediction_value: int) -> str:
+    return "RISQUE ELEVE" if prediction_value == 1 else "RISQUE FAIBLE"
+
+
+def render_nav_slot(page_key: str) -> None:
+    st.markdown('<div class="nav-slot"><span class="nav-slot-spacer">&nbsp;</span></div>', unsafe_allow_html=True)
+
+
+# =================================================================
+# UTILITAIRES MÉTIER
+# =================================================================
+def get_base64_image(image_path: str) -> str:
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+
+def month_to_cyclical(month: int) -> tuple[float, float]:
+    angle = 2 * math.pi * (month - 1) / 12
+    return math.sin(angle), math.cos(angle)
+
+
+def build_storm_features_payload(raw: dict) -> dict:
+    """Construit le corps JSON simplifié attendu par POST /predict."""
+    return {
+        "solar_wind_speed": float(raw["solar_wind_speed"]),
+        "solar_wind_density": float(raw["solar_wind_density"]),
+        "bz_component": float(raw["bz_component"]),
+        "dst_index": float(raw["dst_index"]),
+        "month": int(raw.get("month", datetime.now().month)),
+        "season": raw["season"],
+        "hour_interval": raw["hour_interval"],
+        "is_solar_maximum": int(raw["is_solar_maximum"]),
+    }
+
+
+def prepare_batch_for_api(df: pd.DataFrame) -> pd.DataFrame:
+    """Aligne le CSV sur les 13 features attendues par POST /predict/batch."""
+    df = df.copy()
+    if "month" not in df.columns:
+        df["month"] = datetime.now().month
+    if "sin_month" not in df.columns:
+        df["sin_month"] = df["month"].apply(lambda m: month_to_cyclical(int(m))[0])
+    if "cos_month" not in df.columns:
+        df["cos_month"] = df["month"].apply(lambda m: month_to_cyclical(int(m))[1])
+    return df
+
+
+def parse_api_error(response: requests.Response) -> str:
+    try:
+        detail = response.json().get("detail", response.text)
+        if isinstance(detail, list):
+            return "; ".join(str(item) for item in detail)
+        return str(detail)
+    except Exception:
+        return response.text or f"Erreur HTTP {response.status_code}"
+
+
+def api_health_check() -> dict | None:
+    try:
+        response = requests.get(f"{API_BASE_URL}/health", timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except Exception:
+        return None
+
+
+def api_predict_single(raw_features: dict) -> dict:
+    payload = build_storm_features_payload(raw_features)
+    response = requests.post(
+        f"{API_BASE_URL}/predict",
+        json=payload,
+        timeout=API_TIMEOUT,
+    )
+    if not response.ok:
+        raise RuntimeError(parse_api_error(response))
+
+    data = response.json()
+    is_storm = data["prediction"] == "storm"
+    return {
+        "prediction": 1 if is_storm else 0,
+        "probability": float(data["probability"]),
+        "threshold": float(data["threshold"]),
+        "confidence": CONFIDENCE_FR.get(data["confidence"], data["confidence"]),
+        "payload": payload,
+    }
+
+
+def api_predict_batch(df: pd.DataFrame, progress_bar=None) -> pd.DataFrame:
+    df_prepared = prepare_batch_for_api(df)
+    csv_bytes = df_prepared.to_csv(index=False).encode("utf-8")
+
+    if progress_bar is not None:
+        progress_bar.progress(0.25, text="Envoi du fichier à l'API Aurora…")
+
+    response = requests.post(
+        f"{API_BASE_URL}/predict/batch",
+        files={"file": ("batch.csv", csv_bytes, "text/csv")},
+        timeout=API_TIMEOUT,
+    )
+    if not response.ok:
+        raise RuntimeError(parse_api_error(response))
+
+    if progress_bar is not None:
+        progress_bar.progress(0.85, text="Réception des résultats…")
+
+    return pd.read_csv(io.BytesIO(response.content))
+
+
+def confidence_label(probability: float, threshold: float) -> str:
+    diff = abs(probability - threshold)
+    if diff > 0.30:
+        return "Élevée"
+    if diff > 0.15:
+        return "Moyenne"
+    return "Faible"
+
+
+def risk_label(prediction) -> str:
+    if isinstance(prediction, str):
+        return "Risque Élevé" if prediction == "storm" else "Risque Faible"
+    return "Risque Élevé" if int(prediction) == 1 else "Risque Faible"
+
+
+# =================================================================
+# HEADER
+# =================================================================
+if "page" not in st.session_state:
+    st.session_state.page = "Predict"
+
+# Injection CSS dynamique pour le bouton actif - Plus prononcé
+active_nav_index = {"Predict": 1, "Batch": 2, "About": 3}[st.session_state.page]
+st.markdown(f"""
+    <style>
+        /* On cible le bouton actif avec un style radicalement différent */
+        div[data-testid="stHorizontalBlock"]:has(.header-row-marker) div[data-testid="column"]:nth-child(2) div[data-testid="column"]:nth-child({active_nav_index}) button {{
+            background: linear-gradient(135deg, #6b46c1 0%, #4fd1c5 100%) !important;
+            color: white !important;
+            box-shadow: 0 8px 20px rgba(107, 70, 193, 0.3) !important;
+            transform: scale(1.05) !important;
+            border: none !important;
+            opacity: 1 !important;
+        }}
+        
+        /* Petit point indicateur sous le bouton actif */
+        div[data-testid="stHorizontalBlock"]:has(.header-row-marker) div[data-testid="column"]:nth-child(2) div[data-testid="column"]:nth-child({active_nav_index}) .nav-slot {{
+            background: #4fd1c5;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin: 8px auto 0 auto;
+            box-shadow: 0 0 10px #4fd1c5;
+        }}
+    </style>
+""", unsafe_allow_html=True)
+
+header_cols = st.columns([1.3, 3.4, 1.3], gap="small")
+
+with header_cols[0]:
+    st.markdown('<span class="header-row-marker aurora-marker"></span>', unsafe_allow_html=True)
+    # Calcul du chemin absolu vers la racine du projet à partir de ce fichier
+    # (app/ui/app.py -> remonter de 2 niveaux pour atteindre la racine)
+    root_path = Path(__file__).parents[2]
+    logo_path = root_path / "assets" / "logo.png"
+    try:
+        logo_base64 = get_base64_image(str(logo_path))
+        st.markdown(
+            f"""
+            <div class="header-logo-container">
+                <img src="data:image/png;base64,{logo_base64}" class="logo-img" alt="AURORA">
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        st.markdown(
+            """
+            <div class="header-logo-container">
+                <div style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: white;">AURORA</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+with header_cols[1]:
+    nav_cols = st.columns(3, gap="small")
+    for col, (page_key, btn_key) in zip(nav_cols, [("Predict", "nav1"), ("Batch", "nav2"), ("About", "nav3")]):
+        with col:
+            if st.button(NAV_ITEMS[page_key].upper(), key=btn_key):
+                st.session_state.page = page_key
+            render_nav_slot(page_key)
+
+with header_cols[2]:
+    health = api_health_check()
+    if health and health.get("model_loaded"):
+        status_dot = "#4fd1c5"
+        status_text = "API connectée"
+    else:
+        status_dot = "#ed64a6"
+        status_text = "API hors ligne"
+    st.markdown(
+        f"""
+        <div class="header-status">
+            <div class="status-badge">
+                <span style="color: {status_dot}; font-size: 0.6rem;">●</span>
+                <span style="color: white; font-size: 0.6rem; font-weight: 600;">
+                    {status_text} <span style="color: #718096;">v2.4.1</span>
+                </span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+st.markdown('<hr class="header-divider">', unsafe_allow_html=True)
+
+# =================================================================
+# PAGE : INFÉRENCE
+# =================================================================
+if st.session_state.page == "Predict":
+    section_header(
+        "Analyse de télémétrie en temps réel",
+        'Anticiper les <span>tempêtes géomagnétiques</span>',
+        "AURORA prédit l'occurrence d'une tempête géomagnétique officielle (NASA DONKI) "
+        "dans les 6 prochaines heures à partir des mesures du vent solaire (OMNI2). "
+        "Les aurores boréales en sont une conséquence possible — mais ce n'est pas la cible du modèle.",
+    )
+
+    st.markdown('<span class="predict-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
+    col_form, col_res = st.columns([1.35, 1], gap="large")
+
+    with col_form:
+        card_marker()
+        st.markdown('<div class="card-title">Entrées des Capteurs</div>', unsafe_allow_html=True)
+
+        with st.form("prediction_form"):
+            f1, f2 = st.columns(2, gap="medium")
+
+            with f1:
+                render_label("Vitesse vent solaire", "km/s")
+                sw_speed = st.number_input("sws", 200.0, 1200.0, 391.0, 10.0, label_visibility="collapsed")
+                render_help("Typique : 300–800")
+
+                render_label("Densité vent solaire", "p/cm³")
+                sw_density = st.number_input("swd", 0.0, 100.0, 4.9, 0.1, label_visibility="collapsed")
+                render_help("Densité du plasma interplanétaire")
+
+                render_label("Composante Bz", "nT")
+                bz = st.number_input("bz", -50.0, 30.0, -0.2, 0.1, label_visibility="collapsed")
+                render_help("Sudward (négatif) = risque de reconnexion")
+
+                render_label("Mois d'observation", "1–12")
+                month = st.selectbox(
+                    "month",
+                    list(range(1, 13)),
+                    index=datetime.now().month - 1,
+                    format_func=lambda m: f"Mois {m}",
+                    label_visibility="collapsed",
+                )
+                render_help("Le calcul cyclique (sin/cos) est géré automatiquement")
+
+            with f2:
+                render_label("Indice Dst", "nT")
+                dst = st.number_input("dst", -400.0, 50.0, -6.0, 1.0, label_visibility="collapsed")
+                render_help("Intensité de la tempête (Dst < −50 nT)")
+
+                render_label("Maximum solaire", "Cycle")
+                solar_max = st.selectbox("smax", [0, 1], format_func=lambda x: "Oui" if x == 1 else "Non", label_visibility="collapsed")
+                render_help("Phase de maximum du cycle solaire 25")
+
+                render_label("Saison", "Nominal")
+                season = st.selectbox("season", SEASON_OPTIONS, label_visibility="collapsed")
+                render_help("Saison météorologique de l'observation")
+
+                render_label("Intervalle horaire", "UTC")
+                hour = st.selectbox("hour", HOUR_OPTIONS, label_visibility="collapsed")
+                render_help("Créneau horaire de la mesure")
+
+            run_btn = st.form_submit_button("Initier l'inférence")
+
+    with col_res:
+        card_marker()
+        st.markdown('<div class="card-title">Résultat de l\'Inférence</div>', unsafe_allow_html=True)
+
+        if run_btn:
+            input_data = {
+                "solar_wind_speed": sw_speed,
+                "solar_wind_density": sw_density,
+                "bz_component": bz,
+                "dst_index": dst,
+                "month": month,
+                "is_solar_maximum": solar_max,
+                "season": season,
+                "hour_interval": hour,
+            }
+
+            try:
+                with st.spinner("Appel API Aurora en cours…"):
+                    result = api_predict_single(input_data)
+
+                status_class = "status-high" if result["prediction"] == 1 else "status-low"
+                status_text = risk_label(result["prediction"])
+                narrative = (
+                    "Tempête géomagnétique probable : perturbation magnétosphérique attendue. "
+                    "Risques pour réseaux électriques, satellites et GPS. "
+                    "Des aurores boréales pourraient être visibles aux hautes latitudes."
+                    if result["prediction"] == 1
+                    else "Conditions magnétosphériques stables. Aucune tempête géomagnétique majeure "
+                    "anticipée sur l'horizon de 6 heures."
+                )
+
+                st.markdown(
+                    f"""
+                    <div class="result-panel">
+                        <div class="prob-val">{result['probability'] * 100:.1f}%</div>
+                        <div class="result-status">{status_text}</div>
+                        <div class="status-pill {status_class}">Confiance {result['confidence'].lower()}</div>
+                        <div class="result-meta">
+                            <b>Seuil de décision :</b> {result['threshold']}<br><br>
+                            {narrative}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            except Exception as exc:
+                st.error(f"Échec de l'appel API ({API_BASE_URL}/predict) : {exc}")
+        else:
+            st.markdown(
+                """
+                <div class="empty-state">
+                    <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.5;">✨</div>
+                    <div style="color: white; font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.75rem;">
+                        En attente de données
+                    </div>
+                    <div style="color: #718096; font-size: 0.9rem; max-width: 300px; line-height: 1.6;">
+                        Complétez les entrées des capteurs puis lancez l'inférence neuronale.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+# =================================================================
+# PAGE : ANALYSE COLLECTIVE
+# =================================================================
+elif st.session_state.page == "Batch":
+    section_header(
+        "Traitement de données collectives",
+        'Analyse par <span>lot</span>',
+        "Importez un fichier CSV OMNI2 pour estimer en série la probabilité de tempête "
+        "géomagnétique (horizon 6 h) via l'API POST /predict/batch.",
+    )
+
+    batch_col, = st.columns(1)
+    with batch_col:
+        # Dictionnaire des explications détaillées
+        COL_INFO = [
+            ("solar_wind_speed", "Vitesse du vent solaire (km/s)"),
+            ("solar_wind_density", "Densité de protons (N/cm³)"),
+            ("bz_component", "Champ magnétique Z (nT)"),
+            ("dst_index", "Indice de perturbation (nT)"),
+            ("month", "Mois calendaire (1-12)"),
+            ("season", "Saison (1:Hiv, 2:Pri, 3:Été, 4:Aut)"),
+            ("hour_interval", "Tranche de 3h (Index 0-7)"),
+            ("is_solar_maximum", "Pic d'activité cycle (0/1)")
+        ]
+        
+        glossary_html = "".join([
+            f'<div class="glossary-item"><span class="label">{c}</span><span class="desc">{d}</span></div>' 
+            for c, d in COL_INFO
+        ])
+        
+        st.markdown(
+            f"""
+            <div class="batch-hub-container">
+                <div class="batch-hub-header">
+                    <span class="icon">📁</span>
+                    <span class="title">CENTRE D'OPÉRATIONS COLLECTIVES</span>
+                </div>
+                <div class="batch-hub-content">
+                    <div class="batch-guide-row">
+                        <div class="batch-guide-specs">
+                            <h5 style="margin:0 0 1rem 0; color:#1e293b; font-size:0.85rem; font-weight:800; letter-spacing:0.05em;">GLOSSAIRE DES VARIABLES</h5>
+                            {glossary_html}
+                        </div>
+                        <div class="batch-upload-area">
+                            <h5 style="margin:0 0 0.8rem 0; color:#1e293b; font-size:0.85rem; font-weight:800; letter-spacing:0.05em;">MODE D'EMPLOI</h5>
+                            <div style="font-size:0.82rem; color:#64748b; line-height:1.5; margin-bottom:1.5rem;">
+                                1. <b>Importation :</b> Déposez un fichier .csv contenant les colonnes brutes listées à gauche.<br>
+                                2. <b>Analyse :</b> Le modéle génère les variables dérivées et lance l'inférence complexe.<br>
+                                3. <b>Retour :</b> Vous obtenez un tableau de verdicts et un bouton d'export CSV complet.
+                            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        
+        uploaded_file = st.file_uploader(
+            "Choisir un fichier CSV", type="csv", label_visibility="collapsed", key="batch_uploader"
+        )
+        
+        st.markdown(
+            """
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
+
+        if uploaded_file is not None:
+            df_batch = pd.read_csv(uploaded_file)
+            missing_cols = [c for c in REQUIRED_BATCH_COLUMNS if c not in df_batch.columns]
+
+            if missing_cols:
+                st.error(f"Colonnes manquantes : {', '.join(missing_cols)}")
+            else:
+                st.markdown('<div class="card-title-sm">Aperçu des données entrantes</div>', unsafe_allow_html=True)
+                st.dataframe(df_batch.head(5), use_container_width=True, hide_index=True)
+
+                if st.button("Lancer l'Analyse Prédictive", type="primary", use_container_width=True):
+                    try:
+                        with st.spinner("Analyse du lot en cours via l'API Aurora..."):
+                            df_results = api_predict_batch(df_batch)
+                        
+                        # Ajout du verdict sans accents pour éviter les erreurs d'encodage
+                        df_results["resultat"] = df_results["prediction"].apply(risk_label)
+                        
+                        # On garde 'probability' (fournie par l'API) et on s'assure que 'resultat' est la toute dernière
+                        # On retire toute colonne en français avec accents qui aurait pu être créée
+                        cols_to_remove = ["probabilité_%", "résultat"]
+                        df_results = df_results.drop(columns=[c for c in cols_to_remove if c in df_results.columns])
+                        
+                        # Réorganisation : toutes les colonnes sauf 'resultat', puis 'resultat' en dernier
+                        cols = [c for c in df_results.columns if c != "resultat"] + ["resultat"]
+                        df_results = df_results[cols]
+                        
+                        st.session_state.batch_results = df_results
+                        st.session_state.batch_done = True
+                    except Exception as exc:
+                        st.error(f"Erreur API : {exc}")
+
+                if st.session_state.get("batch_done"):
+                    st.markdown('<div class="results-hub-header">Rapport d\'Investigation Spatiale</div>', unsafe_allow_html=True)
+                    
+                    st.dataframe(
+                        st.session_state.batch_results,
+                        use_container_width=True,
+                        hide_index=True,
+                        column_order=("resultat", "probability", "prediction", "solar_wind_speed", "solar_wind_density", "bz_component", "dst_index"),
+                        column_config={
+                            "resultat": st.column_config.TextColumn("Verdict IA"),
+                            "probability": st.column_config.ProgressColumn("Probabilité", format="%.2f", min_value=0, max_value=1),
+                            "prediction": st.column_config.TextColumn("Statut Brut"),
+                            "solar_wind_speed": st.column_config.NumberColumn("Vitesse", format="%.0f km/s"),
+                        },
+                    )
+                    
+                    st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
+                    
+                    csv_export = st.session_state.batch_results.to_csv(index=False).encode("utf-8")
+                    st.download_button(
+                        label="Exporter le rapport complet (CSV)",
+                        data=csv_export,
+                        file_name=f"aurora_batch_report.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+
+# =================================================================
+# PAGE : MOTEUR AURORA
+# =================================================================
+elif st.session_state.page == "About":
+    section_header(
+        "Spécifications techniques",
+        'Le moteur <span>Aurora</span>',
+        "Système de prédiction des tempêtes géomagnétiques à 6 heures d'avance — "
+        "basé sur les catalogues officiels NASA DONKI et les mesures OMNI2 au point de Lagrange L1.",
+    )
+
+    # --- Ligne 1 : mission, données, pipeline ---
+    st.markdown('<span class="about-info-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
+    row1 = st.columns(3, gap="medium")
+    row1_cards = [
+        (
+            "Mission du modèle",
+            "AURORA répond à la question : <b>« Y aura-t-il une tempête géomagnétique officielle "
+            "dans les 6 prochaines heures ? »</b> La cible <code>is_storm</code> provient du "
+            "catalogue NASA DONKI (événements GST validés par des experts), pas d'un seuil arbitraire "
+            "comme Kp ≥ 5.<br><br>"
+            "<b>Important :</b> nous ne prédisons pas directement les aurores boréales. "
+            "Une tempête géomagnétique est un facteur majeur qui peut les rendre visibles, "
+            "mais d'autres conditions (nuages, latitude, activité nocturne) entrent aussi en jeu.",
+        ),
+        (
+            "Enjeu métier",
+            "Les tempêtes géomagnétiques peuvent induire des courants au sol capables de "
+            "<b>endommager les transformateurs des réseaux électriques</b>, de perturber le "
+            "<b>GPS</b> et les communications aéronautiques polaires. Le délai de 6 heures "
+            "permet aux opérateurs de mettre les satellites en mode survie, de délester les "
+            "réseaux sensibles ou de détourner les vols — tout en conservant un signal physique "
+            "fiable issu des satellites DSCOVR/ACE au point L1.",
+        ),
+        (
+            "Jeu de données",
+            "<b>43 207</b> observations horaires (janv. 2019 — déc. 2023), fusion de deux flux NASA :<br>"
+            "• <b>OMNI2</b> (features X) : vent solaire recalé temporellement vers la Terre<br>"
+            "• <b>DONKI</b> (cible Y) : tempêtes géomagnétiques officielles<br><br>"
+            "Déséquilibre naturel : <b>8,5 %</b> de tempêtes / 91,5 % de calme (~1:11). "
+            "Padding temporel T−24h / T+72h autour des événements pour capturer montée et récupération.",
+        ),
+    ]
+    for col, (title, body) in zip(row1, row1_cards):
+        with col:
+            info_card_marker()
+            st.markdown(f'<div class="info-mini-card"><h4>{title}</h4><p>{body}</p></div>', unsafe_allow_html=True)
+
+    st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
+
+    # --- Ligne 2 : algorithme, features, seuil ---
+    row2 = st.columns(3, gap="medium")
+    row2_cards = [
+        (
+            "Algorithme retenu",
+            "Parmi <b>12 configurations</b> testées (4 modèles × 3 stratégies de rééquilibrage), "
+            "la combinaison gagnante est <b>Random Forest + Undersampling</b> (Recall CV = 91,7 %).<br><br>"
+            "Hyperparamètres optimisés (GridSearchCV, 5 folds) :<br>"
+            "• <code>n_estimators</code> = 500<br>"
+            "• <code>max_depth</code> = 20<br>"
+            "• <code>min_samples_leaf</code> = 1<br>"
+            "• <code>max_features</code> = sqrt<br><br>"
+            "Pipeline : RobustScaler sur variables continues + One-Hot Encoding (saison, créneau horaire).",
+        ),
+        (
+            "Signaux physiques clés",
+            "Features les plus discriminantes identifiées en EDA et modélisation :<br>"
+            "• <b>Bz sudward</b> (reconnexion magnétique)<br>"
+            "• <b>Dst</b> (intensité de la tempête, Dst &lt; −50 nT = définition officielle)<br>"
+            "• <b>Vitesse du vent solaire</b> (51 % des outliers = tempêtes)<br>"
+            "• <b>bz_min_3h</b>, pression dynamique, interaction <code>bz×dst</code><br><br>"
+            "Les valeurs extrêmes sont <b>conservées</b> (outliers = signaux physiques, pas erreurs).",
+        ),
+        (
+            "Seuil de décision",
+            "Le seuil par défaut (0,5) n'est pas adapté aux données déséquilibrées. "
+            "Un seuil optimal <b>0,28</b> minimise le coût métier pondéré "
+            "<code>100 × FN + 1 × FP</code> sur le jeu de test (réduction de coût de 43,9 %).<br><br>"
+            "Coût d'un <b>faux négatif</b> (tempête manquée) = 100× celui d'un faux positif, "
+            "car l'enjeu est de ne rater aucune tempête critique pour les infrastructures.",
+        ),
+    ]
+    for col, (title, body) in zip(row2, row2_cards):
+        with col:
+            info_card_marker()
+            st.markdown(f'<div class="info-mini-card"><h4>{title}</h4><p>{body}</p></div>', unsafe_allow_html=True)
+
+    st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
+
+    # --- Métriques (jeu de test, seuil opérationnel 0,28) ---
+    st.markdown('<span class="about-metrics-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
+    metrics_col, = st.columns(1)
+
+    with metrics_col:
+        card_marker()
+        st.markdown(
+            '<div class="card-title">Performances — jeu de test (6 482 obs.)</div>'
+            '<p style="color:#718096;font-size:0.88rem;margin:-1rem 0 1.5rem 0;">'
+            "Métriques au seuil opérationnel <b>0,28</b> (évaluation finale, notebook 06). "
+            "Le jeu de test n'a jamais été vu à l'entraînement ni au tuning.</p>",
+            unsafe_allow_html=True,
+        )
+        m1, m2, m3 = st.columns(3, gap="medium")
+        prod_metrics = [
+            ("Recall (Sensibilité)", "98,7 %", "Tempêtes détectées — objectif ≥ 80 % atteint"),
+            ("Précision", "23,4 %", "~1 alerte sur 4 est une vraie tempête"),
+            ("F1-Score", "0,379", "Compromis recall/précision au seuil 0,28"),
+            ("ROC-AUC", "0,964", "Excellente capacité de classement"),
+            ("PR-AUC", "0,767", "×9 vs baseline aléatoire (0,084)"),
+            ("Faux négatifs", "7 / 545", "36 FN au seuil 0,5 → 7 au seuil 0,28"),
+        ]
+        for i, (title, value, hint) in enumerate(prod_metrics):
+            target = [m1, m2, m3][i % 3]
+            with target:
+                st.markdown(
+                    f'<div class="metric-grid-item">'
+                    f'<div class="metric-title">{title}</div>'
+                    f'<div class="metric-val">{value}</div>'
+                    f'<div style="color:#718096;font-size:0.72rem;margin-top:0.5rem;line-height:1.4;">{hint}</div>'
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+
+
+    st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
+
+    # --- Ligne 3 : limites ---
+    st.markdown('<span class="about-info-grid-marker aurora-marker"></span>', unsafe_allow_html=True)
+    row3 = st.columns(3, gap="medium")
+    row3_cards = [
+        (
+            "Limites connues",
+            "• <b>Faux positifs élevés</b> : la précision au seuil 0,28 est de 23,4 % — "
+            "le modèle privilégie le rappel pour ne manquer aucune tempête critique.<br>"
+            "• <b>Dépendance capteurs</b> : qualité liée aux satellites DSCOVR/ACE et au recalage OMNI2.<br>"
+            "• <b>Horizon fixe</b> : prédiction à 6 h uniquement, pas de prévision à plusieurs jours.<br>"
+            "• <b>Pas de causalité aurore</b> : le modèle ne prévoit pas la visibilité des aurores boréales.",
+        ),
+        (
+            "Méthodologie",
+            "• Split temporel strict : train / validation / test sans fuite de données.<br>"
+            "• RobustScaler fitté sur le train uniquement (anti data leakage).<br>"
+            "• SMOTE et class_weight testés mais Undersampling retenu pour le meilleur recall.<br>"
+            "• 12 modèles comparés : Régression logistique, Arbre, Random Forest, XGBoost.<br>"
+            "• Métrique prioritaire : <b>Recall</b> (minimiser les tempêtes non détectées).",
+        ),
+        (
+            "Objectifs Phase 1",
+            "Vérification au seuil optimal 0,28 sur le jeu de test :<br>"
+            "• Recall ≥ 0,80 → <b style='color:#4fd1c5;'>ATTEINT</b> (0,987)<br>"
+            "• Précision ≥ 0,50 → <b style='color:#ed64a6;'>NON ATTEINT</b> (0,234)<br><br>"
+            "Le compromis est assumé : en météorologie spatiale opérationnelle, "
+            "rater une tempête coûte bien plus cher qu'une fausse alerte.",
+        ),
+    ]
+    for col, (title, body) in zip(row3, row3_cards):
+        with col:
+            info_card_marker()
+            st.markdown(f'<div class="info-mini-card"><h4>{title}</h4><p>{body}</p></div>', unsafe_allow_html=True)
+
+# =================================================================
+# FOOTER
+# =================================================================
+st.markdown(
+    f'<div class="page-footer">AURORA · PRÉDICTION DES TEMPÊTES GÉOMAGNÉTIQUES · {datetime.now().year}</div>',
+    unsafe_allow_html=True,
+)

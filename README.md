@@ -4,6 +4,15 @@
 
 **AURORA** est un système intelligent de prédiction des tempêtes géomagnétiques capable d'anticiper les perturbations solaires **6 heures à l'avance**. Développé à partir des données de la NASA (OMNI2 et DONKI), il s'appuie sur un **Random Forest + RandomUnderSampler** entraîné à maximiser le Recall (seuil optimal : 0.28), afin de ne manquer aucune tempête réelle. L'objectif métier est la **protection des infrastructures critiques** : réseaux électriques, satellites et communications aéronautiques, menacés par les éruptions solaires.
 
+### Détails du Projet
+
+| Paramètre | Valeur |
+| :--- | :--- |
+| **Répertoire GitHub** | [https://github.com/douae-rohand/PROJET_AURORAS.git](https://github.com/douae-rohand/PROJET_AURORAS.git) |
+| **Auteurs** | Douae Rohand, Oumaima Ameziane, Raihana Mohito |
+| **Technologies** | Python (FastAPI, Streamlit), Docker, Scikit-learn |
+| **Licence** | MIT |
+
 ---
 
 ## Aperçu de l'Interface
@@ -23,8 +32,13 @@
 
 ### Avec Docker (Recommandé)
 Le projet est entièrement conteneurisé pour simplifier le déploiement.
-1. Installez Docker et Docker Desktop.
-2. Lancez l'ensemble des services :
+1. Clonez le dépôt :
+   ```bash
+   git clone https://github.com/douae-rohand/PROJET_AURORAS.git
+   cd PROJET_AURORAS
+   ```
+2. Installez Docker et Docker Desktop.
+3. Lancez l'ensemble des services :
    ```bash
    docker-compose up --build
    ```

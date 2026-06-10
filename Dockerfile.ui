@@ -17,9 +17,10 @@ WORKDIR /app
 COPY requirements-ui.txt .
 RUN pip install --no-cache-dir -r requirements-ui.txt
 
-# ── Étape 2 : code applicatif ────────────────────────────────────
-COPY app/ui/ /app/ui/
+# ── Étape 2 : code applicatif & ressources ───────────────
+COPY app/ /app/app/
+COPY assets/ /app/assets/
 
 EXPOSE ${STREAMLIT_PORT}
 
-CMD ["sh", "-c", "streamlit run ui/app.py --server.port=${STREAMLIT_PORT} --server.address=0.0.0.0"]
+CMD ["sh", "-c", "streamlit run app/ui/app.py --server.port=${STREAMLIT_PORT} --server.address=0.0.0.0"]

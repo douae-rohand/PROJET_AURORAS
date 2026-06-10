@@ -37,7 +37,7 @@ services:
     ports:
       - "8501:8501"
     environment:
-      API_URL: http://api:8000
+      AURORA_API_URL: http://api:8000
       STREAMLIT_PORT: 8501
     depends_on:
       api:

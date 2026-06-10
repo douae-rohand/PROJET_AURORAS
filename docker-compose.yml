@@ -1,0 +1,52 @@
+# ── docker-compose.yml ──────────────────────────────────────────
+# PROJET_AURORAS — Prédiction des Tempêtes Géomagnétiques
+# Deux services : api (FastAPI) + ui (Streamlit)
+# Lancement : docker-compose up --build
+# ────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Service 1 : API FastAPI ────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: aurora_api
+    ports:
+      - "8000:8000"
+    environment:
+      APP_PORT: 8000
+      LOG_LEVEL: info
+      MODEL_PATH: /app/models/final_model.joblib
+    networks:
+      - aurora_network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  # ── Service 2 : Interface Streamlit ───────────────────────────
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: aurora_ui
+    ports:
+      - "8501:8501"
+    environment:
+      AURORA_API_URL: http://api:8000
+      STREAMLIT_PORT: 8501
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - aurora_network
+    restart: unless-stopped
+
+# ── Réseau interne ─────────────────────────────────────────────
+networks:
+  aurora_network:
+    driver: bridge

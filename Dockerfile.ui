@@ -1,0 +1,26 @@
+# ── Dockerfile.ui ───────────────────────────────────────────────
+# Image : python:3.11-slim
+# Service : Interface Streamlit — PROJET_AURORAS
+# ────────────────────────────────────────────────────────────────
+
+FROM python:3.11-slim
+
+# Variables d'environnement configurables
+ENV API_URL=http://api:8000 \
+    STREAMLIT_PORT=8501 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# ── Étape 1 : dépendances ────────────────────────────────────────
+COPY requirements-ui.txt .
+RUN pip install --no-cache-dir -r requirements-ui.txt
+
+# ── Étape 2 : code applicatif & ressources ───────────────
+COPY app/ /app/app/
+COPY assets/ /app/assets/
+
+EXPOSE ${STREAMLIT_PORT}
+
+CMD ["sh", "-c", "streamlit run app/ui/app.py --server.port=${STREAMLIT_PORT} --server.address=0.0.0.0"]
